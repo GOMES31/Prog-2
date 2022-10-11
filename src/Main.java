@@ -1,5 +1,3 @@
-package Exercicio1;
-
 public class Main {
     public static void main(String[] args) {
         Vehicle vehicle = new Vehicle("M5","BMW",2018,52250.25);
