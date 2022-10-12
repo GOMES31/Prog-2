@@ -49,6 +49,10 @@ public class Student {
         this.cardNumber = _cardNumber;
     }
 
+    public int getCardNumber(){
+        return this.cardNumber;
+    }
+
     public void setGrades(double[] _grades){
         this.grades = _grades;
     }
@@ -82,6 +86,15 @@ public class Student {
             }
         }
         return best;
+    }
+
+    // Created this method just for testing
+    public double[] randomGrades(){
+        double[] random = new double[5];
+        for(int i = 0; i < random.length; i++){
+            random[i] = Math.round((7 + Math.random() * (20 - 7))*100)/100.0;
+        }
+        return random;
     }
 
     @Override
