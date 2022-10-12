@@ -14,7 +14,7 @@ public class Main {
         math.addStudent(fernando);
         math.addStudent(ana);
 
-
+        // Giving the students random grades just for testing
         for(Student student: math.getStudents()){
             if(student==null){
                 break;

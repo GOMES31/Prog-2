@@ -41,7 +41,7 @@ public class Subject {
     public String bestStudent(){
         Student bestStudent = this.students[0];
         for(int i = 0; i < this.students.length; i++){
-            if(this.students[0] == null){
+            if(bestStudent == null){
                 return "No students found!";
             }
             else if(this.students[i] == null){
