@@ -21,6 +21,7 @@ public class Main {
             }
             student.setGrades(student.randomGrades());
         }
+
         System.out.println("--------------------------------------");
 
         // Prints the students registered in a subject
@@ -50,7 +51,6 @@ public class Main {
         System.out.println("--------------------------------------");
 
         // Prints the student with the best average
-
         System.out.println(math.bestStudent());
 
 
