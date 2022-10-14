@@ -10,9 +10,9 @@ public class Main {
         Subject math = new Subject();
 
         // Adding the students to the subject
-        math.addStudent(vitor);
-        math.addStudent(fernando);
-        math.addStudent(ana);
+//        math.addStudent(vitor);
+//        math.addStudent(fernando);
+//        math.addStudent(ana);
 
         // Giving the students random grades just for testing
         for(Student student: math.getStudents()){

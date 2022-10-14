@@ -18,7 +18,7 @@ public class Student {
     }
 
     public String getName(){
-        return this.name;
+        return name;
     }
 
     public void setEmail(String _email){
@@ -26,7 +26,7 @@ public class Student {
     }
 
     public String getEmail(){
-        return this.email;
+        return email;
     }
 
     public void setCity(String _city){
@@ -34,7 +34,7 @@ public class Student {
     }
 
     public String getCity(){
-        return this.city;
+        return city;
     }
 
     public void setAge(int _age){
@@ -42,7 +42,7 @@ public class Student {
     }
 
     public int getAge(){
-        return this.age;
+        return age;
     }
 
     public void setCardNumber(int _cardNumber){
@@ -50,7 +50,7 @@ public class Student {
     }
 
     public int getCardNumber(){
-        return this.cardNumber;
+        return cardNumber;
     }
 
     public void setGrades(double[] _grades){
@@ -58,7 +58,7 @@ public class Student {
     }
 
     public double[] getGrades(){
-        return this.grades;
+        return grades;
     }
 
     public void addGrade(double _grade){

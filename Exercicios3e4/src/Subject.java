@@ -10,7 +10,7 @@ public class Subject {
     }
 
     public Student[] getStudents(){
-        return this.students;
+        return students;
     }
 
     public void addStudent(Student _student){
