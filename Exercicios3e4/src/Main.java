@@ -10,9 +10,9 @@ public class Main {
         Subject math = new Subject();
 
         // Adding the students to the subject
-//        math.addStudent(vitor);
-//        math.addStudent(fernando);
-//        math.addStudent(ana);
+        math.addStudent(vitor);
+        math.addStudent(fernando);
+        math.addStudent(ana);
 
         // Giving the students random grades just for testing
         for(Student student: math.getStudents()){
@@ -25,7 +25,7 @@ public class Main {
         System.out.println("--------------------------------------");
 
         // Prints the students registered in a subject
-        System.out.println(math.toString());
+        System.out.println(math);
 
         System.out.println("--------------------------------------");
 
@@ -35,7 +35,7 @@ public class Main {
         System.out.println("--------------------------------------");
 
         // Print the student info
-        System.out.println(fernando.toString());
+        System.out.println(fernando);
 
         System.out.println("--------------------------------------");
 
@@ -51,7 +51,7 @@ public class Main {
         System.out.println("--------------------------------------");
 
         // Prints the student with the best average
-        System.out.println(math.bestStudent());
+        System.out.println(math.toString());
 
 
     }
