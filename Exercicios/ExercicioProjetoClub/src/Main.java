@@ -10,6 +10,5 @@ public class Main {
         club.joinedInMonth(0);
         System.out.println(club.joinedInMonth(1));
         System.out.println(club.joinedInMonth(11));
-
     }
 }
