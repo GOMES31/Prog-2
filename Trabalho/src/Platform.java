@@ -13,13 +13,13 @@ public class Platform {
     public void registerUser(User user){
         if(checkIfIsRegistered(user.getUsername())) System.out.println("Utilizador já registado!");
         users.add(user);
-//        try{
-//            BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt"));
-//            writer.write("Username: " + user.getUsername() + "\tPassword: " + user.getPassword());
-//            writer.close();
-//        }catch(IOException e){
-//            e.printStackTrace();
-//        }
+        try{
+            BufferedWriter writer = new BufferedWriter(new FileWriter("users.txt"));
+            writer.write("Username: " + user.getUsername() + "\tPassword: " + user.getPassword());
+            writer.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 
 
