@@ -6,14 +6,17 @@ import java.util.Scanner;
 
 public class Platform {
     private ArrayList<User> users;
-    private String[] startMenu,initialMenu;
+    private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
     private Scanner scan = new Scanner(System.in);
     private String username,password;
 
     public Platform(){
         users = new ArrayList<>();
         startMenu = new String[4];
-        initialMenu = new String[]
+        initialMenu = new String[5];
+        talentMenu = new String[6];
+        skillsMenu = new String[6];
+        jobsMenu = new String[6];
     }
 
     public void defineStartMenu(){
@@ -24,7 +27,28 @@ public class Platform {
     }
 
     public void defineInitialMenu(){
-        initialMenu[]
+        initialMenu[0] = "----- MENU INICIAL -----";
+        initialMenu[1] = "1 - Menu Talentos";
+        initialMenu[2] = "2 - Menu Empregador";
+        initialMenu[3] = "3 - Menu Skills";
+        initialMenu[4] = "0 - [SAIR]";
+    }
+
+    public void defineTalentMenu(){
+        talentMenu[0] = "---- MENU TALENTOS ----";
+        talentMenu[1] = "1 - Listar Perfil de Talento";
+        talentMenu[2] = "2 - Adicionar Perfil de Talento";
+        talentMenu[3] = "3 - Editar Perfil de Talento";
+        talentMenu[4] = "9 - VOLTAR A TRÁS!";
+        talentMenu[5] = "0 - [SAIR]";
+    }
+
+    public void defineJobsMenu(){
+
+    }
+
+    public void defineSkillsMenu(){
+
     }
 
     public void start(){
@@ -59,8 +83,8 @@ public class Platform {
         }
         System.out.println("Insira a sua password!");
         password = scan.next();
-        if(!checkIfPasswordIsCorrect(password)){
-            while(!checkIfPasswordIsCorrect(password)){
+        if(!checkIfPasswordIsCorrect(username,password)){
+            while(!checkIfPasswordIsCorrect(username,password)){
                 System.out.println("Password errada! Tente novamente");
                 password = scan.next();
             }
@@ -73,30 +97,48 @@ public class Platform {
         System.out.println("Insira o username que pretende registar!");
         username = scan.next();
         if(checkIfUserIsRegistered(username)){
-            while(!checkIfUserIsRegistered(password)){
-                System.out.println("Username já registado! Tente novamente");
+            while(checkIfUserIsRegistered(username)){
+                System.out.println("Username já registado! Tente novamente!");
                 username = scan.next();
             }
         }
         System.out.println("Insira a password que pretende usar!");
         password = scan.next();
-        users.add(new User(username,password));
-        saveUserToCsvFile(new User(username,password));
+        users.add(new User(username,password,Type.NORMAL));
+        saveUserToCsvFile(new User(username,password,Type.NORMAL));
         initialMenu();
     }
 
-    public void initalMenu(){
+    public void initialMenu(){
         defineInitialMenu();
+        System.out.println(String.join("\n", initialMenu) + "\nEscolha uma opção!");
     }
     public boolean checkIfUserIsRegistered(String username){
-
+        return false;
     }
 
-    public boolean checkIfPasswordIsCorrect(String password){
-
+    public boolean checkIfPasswordIsCorrect(String username,String password){
+        return false;
     }
 
     public void saveUserToCsvFile(User user){
+        try{
+            // Obter o caminho da pasta src
+            String srcPath = Main.class.getResource("/").getPath();
 
+            // Adicionar o nome do ficheiro ao caminho
+            String filePath = srcPath + "/users.csv";
+
+            // Abre o ficheiro em modo anexo
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true));
+
+            // Escreve os dados do utilizador no ficheiro
+            writer.write(user.getUsername() + "," + user.getPassword() + "," + user.getType());
+            writer.newLine();
+
+            writer.close();
+        }catch(IOException e){
+            e.printStackTrace();
+        }
     }
 }
