@@ -13,6 +13,7 @@ public class User {
     public User(String username, String password,Type type){
             this.username = username;
             this.password = password;
+            this.type = type;
     }
 
     public String getUsername(){

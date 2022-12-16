@@ -1,22 +1,23 @@
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Platform {
+    private Repository repository;
     private ArrayList<User> users;
     private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
     private Scanner scan = new Scanner(System.in);
     private String username,password;
 
+
     public Platform(){
+        repository = new Repository();
         users = new ArrayList<>();
         startMenu = new String[4];
         initialMenu = new String[5];
         talentMenu = new String[6];
-        skillsMenu = new String[6];
-        jobsMenu = new String[6];
+        skillsMenu = new String[7];
+        jobsMenu = new String[7];
     }
 
     public void defineStartMenu(){
@@ -44,11 +45,23 @@ public class Platform {
     }
 
     public void defineJobsMenu(){
-
+        jobsMenu[0] = "---- MENU EMPREGADOR ----";
+        jobsMenu[1] = "1 - Listar trabalhos";
+        jobsMenu[2] = "2 - Adicionar trabalho";
+        jobsMenu[3] = "3 - Eliminar trabalho";
+        jobsMenu[4] = "4 - Editar trabalho";
+        jobsMenu[5] = "9 - Voltar atrás";
+        jobsMenu[6] = "0 - [SAIR]";
     }
 
     public void defineSkillsMenu(){
-
+        skillsMenu[0] = "---- MENU SKILLS ----";
+        skillsMenu[1] = "1 - Listar Skills";
+        skillsMenu[2] = "2 - Adicionar Skill";
+        skillsMenu[3] = "3 - Editar Skill";
+        skillsMenu[4] = "4 - Eliminar Skill";
+        skillsMenu[5] = " 9 - VOLTAR A TRÁS!";
+        skillsMenu[6] = "0 - [SAIR]";
     }
 
     public void start(){
@@ -114,11 +127,47 @@ public class Platform {
         System.out.println(String.join("\n", initialMenu) + "\nEscolha uma opção!");
     }
     public boolean checkIfUserIsRegistered(String username){
-        return false;
+        try{
+            // Le o ficheiro users.csv
+            BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"));
+            String line;
+            while((line = reader.readLine()) != null){
+                // Divide as linhas por onde tem virgulas, para separar o username da password e do tipo de utilizador
+                String[] parts = line.split(",");
+                // parts[0] = username, parts[1] = password, parts[2]
+                if(parts[0].equals(username)) return true;
+            }
+            reader.close();
+            return false;
+        }catch(IOException e){
+            System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
+            return false;
+        }
     }
 
     public boolean checkIfPasswordIsCorrect(String username,String password){
-        return false;
+        try{
+            String savedPassword="";
+            // Le o ficheiro users.csv
+            BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"));
+            String line;
+            while((line = reader.readLine()) != null){
+                // Divide as linhas por onde tem virgulas, para separar o username da password e do tipo de utilizador
+                String[] parts = line.split(",");
+                // parts[0] = username, parts[1] = password, parts[2]
+                if(parts[0].equals(username)) {
+                    savedPassword = parts[1];
+                }
+                if(savedPassword.equals(password)){
+                    return true;
+                }
+            }
+            reader.close();
+            return false;
+        }catch(IOException e){
+            System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
+            return false;
+        }
     }
 
     public void saveUserToCsvFile(User user){
