@@ -4,7 +4,6 @@ import java.util.Scanner;
 
 public class Platform {
     private Repository repository;
-    private ArrayList<User> users;
     private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
     private Scanner scan = new Scanner(System.in);
     private String username,password;
@@ -12,7 +11,6 @@ public class Platform {
 
     public Platform(){
         repository = new Repository();
-        users = new ArrayList<>();
         startMenu = new String[4];
         initialMenu = new String[5];
         talentMenu = new String[6];
@@ -117,7 +115,6 @@ public class Platform {
         }
         System.out.println("Insira a password que pretende usar!");
         password = scan.next();
-        users.add(new User(username,password,Type.NORMAL));
         saveUserToCsvFile(new User(username,password,Type.NORMAL));
         initialMenu();
     }
