@@ -5,9 +5,10 @@ import java.util.Scanner;
 public class Platform {
     private Repository repository;
     private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
-    private Scanner scan = new Scanner(System.in);
+    private Scanner scan;
     private String username,password;
 
+    // TODO - TRY CATCH NOS MENUS
 
     public Platform(){
         repository = new Repository();
@@ -63,6 +64,7 @@ public class Platform {
     }
 
     public void start(){
+         scan = new Scanner(System.in);
         defineStartMenu();
         System.out.println(String.join("\n", startMenu) + "\nEscolha uma opção!");
         int option = -1;
@@ -84,39 +86,63 @@ public class Platform {
         scan.close();
     }
 
+    public boolean checkIfUsersCsvFileExists(){
+        File file = new File("src/users.csv");
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                System.out.println("Error creating file: " + e.getMessage());
+            }
+            return false;
+        }
+        return true;
+    }
+
     public void login(){
+        scan = new Scanner(System.in);
         System.out.println("----- LOGIN MENU -----");
         System.out.println("Insira o seu username!");
         username = scan.next();
-        if(!checkIfUserIsRegistered(username)){
+        if(!checkIfUsersCsvFileExists()){
+            System.out.println("Não existem utilizadores registados!");
+            start();
+        }
+        else if(!checkIfUserIsRegistered(username)){
             System.out.println("Utilizador não existe! \nTente criar uma conta ou então fazer login com outro username!");
             start();
         }
         System.out.println("Insira a sua password!");
         password = scan.next();
-        if(!checkIfPasswordIsCorrect(username,password)){
-            while(!checkIfPasswordIsCorrect(username,password)){
+        if(!checkIfPasswordIsCorrect(username,password)) {
+            while (!checkIfPasswordIsCorrect(username, password)) {
                 System.out.println("Password errada! Tente novamente");
                 password = scan.next();
             }
         }
+        scan.close();
+
+        System.out.println("Logado com sucesso!");
         initialMenu();
     }
 
     public void register(){
+        scan = new Scanner(System.in);
         System.out.println("----- REGISTER MENU -----");
         System.out.println("Insira o username que pretende registar!");
-        username = scan.next();
-        if(checkIfUserIsRegistered(username)){
-            while(checkIfUserIsRegistered(username)){
-                System.out.println("Username já registado! Tente novamente!");
-                username = scan.next();
+        username = scan.next();checkIfUsersCsvFileExists();
+        if(checkIfUsersCsvFileExists()){
+            if(checkIfUserIsRegistered(username)){
+                System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
+                start();
             }
+            System.out.println("Insira a password que pretende usar!");
+            password = scan.next();
+            scan.close();
+            saveUserToCsvFile(new User(username,password,Type.NORMAL));
+            System.out.println("Registado com sucesso!");
+            initialMenu();
         }
-        System.out.println("Insira a password que pretende usar!");
-        password = scan.next();
-        saveUserToCsvFile(new User(username,password,Type.NORMAL));
-        initialMenu();
     }
 
     public void initialMenu(){
@@ -137,6 +163,7 @@ public class Platform {
             reader.close();
             return false;
         }catch(IOException e){
+            e.printStackTrace();
             System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
             return false;
         }
@@ -169,14 +196,8 @@ public class Platform {
 
     public void saveUserToCsvFile(User user){
         try{
-            // Obter o caminho da pasta src
-            String srcPath = Main.class.getResource("/").getPath();
-
-            // Adicionar o nome do ficheiro ao caminho
-            String filePath = srcPath + "/users.csv";
-
             // Abre o ficheiro em modo anexo
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filePath,true));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("src/users.csv",true));
 
             // Escreve os dados do utilizador no ficheiro
             writer.write(user.getUsername() + "," + user.getPassword() + "," + user.getType());

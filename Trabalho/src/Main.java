@@ -3,6 +3,5 @@ public class Main {
         Platform plat = new Platform();
         plat.start();
 
-
     }
 }
