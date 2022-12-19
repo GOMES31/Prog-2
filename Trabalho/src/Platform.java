@@ -1,14 +1,15 @@
 import java.io.*;
 import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Platform {
     private Repository repository;
     private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
-    private Scanner scan;
-    private String username,password;
 
-    // TODO - TRY CATCH NOS MENUS
+    private String username,password;
+    private Scanner scan;
+
 
     public Platform(){
         repository = new Repository();
@@ -64,17 +65,23 @@ public class Platform {
     }
 
     public void start(){
-         scan = new Scanner(System.in);
+        scan = new Scanner(System.in);
         defineStartMenu();
         System.out.println(String.join("\n", startMenu) + "\nEscolha uma opção!");
         int option = -1;
         while(option < 0 || option > 2){
-            option = scan.nextInt();
+            try {
+                option = scan.nextInt();
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+                continue;
+            }
             if(option < 0 || option > 2) System.out.println("Opção Inválida!\n" + String.join("\n", startMenu));
         }
         switch(option){
             case 0:
-                System.out.println("Adeus!");
+                System.out.println("Exiting...!");
                 break;
             case 1:
                 login();
@@ -91,10 +98,11 @@ public class Platform {
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                return false;
             } catch (IOException e) {
                 System.out.println("Error creating file: " + e.getMessage());
+                return false;
             }
-            return false;
         }
         return true;
     }
@@ -112,17 +120,17 @@ public class Platform {
             System.out.println("Utilizador não existe! \nTente criar uma conta ou então fazer login com outro username!");
             start();
         }
+
         System.out.println("Insira a sua password!");
         password = scan.next();
-        if(!checkIfPasswordIsCorrect(username,password)) {
-            while (!checkIfPasswordIsCorrect(username, password)) {
+
+        while (!checkIfPasswordIsCorrect(username, password)) {
                 System.out.println("Password errada! Tente novamente");
                 password = scan.next();
-            }
         }
-        scan.close();
 
         System.out.println("Logado com sucesso!");
+        scan.close();
         initialMenu();
     }
 
@@ -130,7 +138,7 @@ public class Platform {
         scan = new Scanner(System.in);
         System.out.println("----- REGISTER MENU -----");
         System.out.println("Insira o username que pretende registar!");
-        username = scan.next();checkIfUsersCsvFileExists();
+        username = scan.next();
         if(checkIfUsersCsvFileExists()){
             if(checkIfUserIsRegistered(username)){
                 System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
@@ -138,9 +146,9 @@ public class Platform {
             }
             System.out.println("Insira a password que pretende usar!");
             password = scan.next();
-            scan.close();
             saveUserToCsvFile(new User(username,password,Type.NORMAL));
             System.out.println("Registado com sucesso!");
+            scan.close();
             initialMenu();
         }
     }
@@ -163,7 +171,6 @@ public class Platform {
             reader.close();
             return false;
         }catch(IOException e){
-            e.printStackTrace();
             System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
             return false;
         }
@@ -181,13 +188,11 @@ public class Platform {
                 // parts[0] = username, parts[1] = password, parts[2]
                 if(parts[0].equals(username)) {
                     savedPassword = parts[1];
-                }
-                if(savedPassword.equals(password)){
-                    return true;
+                    break;
                 }
             }
             reader.close();
-            return false;
+            return savedPassword.equals(password);
         }catch(IOException e){
             System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
             return false;

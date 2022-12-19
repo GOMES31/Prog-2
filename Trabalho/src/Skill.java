@@ -11,6 +11,31 @@ public class Skill {
         this.field = field;
         this.expYears = expYears;
     }
+    public String getName() {
+        return name;
+    }
 
-    // TODO - GETTERS E SETTERS
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public String getField() {
+        return field;
+    }
+
+    public void setField(String field) {
+        this.field = field;
+    }
+
+    public double getExpYears() {
+        return expYears;
+    }
+
+    public void setExpYears(double expYears) {
+        this.expYears = expYears;
+    }
 }
