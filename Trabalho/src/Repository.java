@@ -1,12 +1,13 @@
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class Repository {
     private Map<Integer,Talent> talents;
     private Map<Integer,Skill> skills;
     private Map<Integer,Job> jobs;
+
+    private ArrayList<String> clients;
 
     private int talentsKey = 0;
     private int skillsKey = 0;
@@ -16,6 +17,7 @@ public class Repository {
         talents = new HashMap<>();
         skills = new HashMap<>();
         jobs = new HashMap<>();
+        clients = new ArrayList<>();
     }
 
     public Map<Integer,Talent> getTalents(){
@@ -24,6 +26,7 @@ public class Repository {
 
     public void addTalent(Talent talent){
         talents.put(talentsKey++,talent);
+        System.out.println("Talento adicionado com sucesso!");
     }
 
     public void removeTalent(int key) {
@@ -40,6 +43,7 @@ public class Repository {
 
             // Atualiza o mapa inicial
             talents = updatedTalents;
+            System.out.println("Talento removido com sucesso!");
         }
     }
 
@@ -48,6 +52,7 @@ public class Repository {
     }
     public void addSkill(Skill skill){
         skills.put(skillsKey++,skill);
+        System.out.println("Skill adicionada com sucesso!");
     }
 
     public void removeSkill(int key){
@@ -64,6 +69,7 @@ public class Repository {
 
             // Atualiza o mapa inicial
             skills = updatedSkills;
+            System.out.print("Skill removida com sucesso!");
         }
     }
     public Map<Integer,Job> getJobs(){
@@ -72,6 +78,7 @@ public class Repository {
 
     public void addJob(Job job){
         jobs.put(jobsKey++,job);
+        System.out.println("Oferta de Emprego adicionada com sucesso!");
     }
     public void removeJob(int key){
         if (jobs.containsKey(key)) {
@@ -87,8 +94,26 @@ public class Repository {
 
             // Atualiza o mapa inicial
             jobs = updatedJobs;
+            System.out.print("Oferta de Emprego removida com sucesso!");
         }
     }
 
-    // TODO - RESTO DOS METODOS
+    public ArrayList<String> getClients(){
+        return clients;
+    }
+
+    public void addClient(String client){
+        clients.add(client);
+    }
+
+    public void removeClient(String client){
+        for(String _client: clients){
+            if(_client.equals(client)){
+                clients.remove(_client);
+                System.out.println("Cliente removido com sucesso!");
+                break;
+            }
+        }
+        System.out.println("Cliente não encontrado!");
+    }
  }

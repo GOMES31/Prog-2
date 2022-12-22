@@ -7,7 +7,8 @@ public class Platform {
     private Repository repository;
     private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
 
-    private String username,password;
+    private String username;
+
     private Scanner scan;
 
 
@@ -66,31 +67,41 @@ public class Platform {
 
     public void start(){
         scan = new Scanner(System.in);
+        treatStartMenu();
+    }
+
+    public void treatStartMenu(){
         defineStartMenu();
         System.out.println(String.join("\n", startMenu) + "\nEscolha uma opção!");
-        int option = -1;
-        while(option < 0 || option > 2){
-            try {
-                option = scan.nextInt();
-            }catch(InputMismatchException e){
-                System.out.println("Input inválido! Insira um número!");
-                scan.next();
-                continue;
+        int option = scan.nextInt();
+        try {
+            while(option < 0 || option > 2){
+                try {
+                    option = scan.nextInt();
+                }catch(InputMismatchException e){
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                    continue;
+                }
+                if(option < 0 || option > 2) System.out.println("Opção Inválida!\n" + String.join("\n", startMenu));
             }
-            if(option < 0 || option > 2) System.out.println("Opção Inválida!\n" + String.join("\n", startMenu));
+            switch(option){
+                case 0:
+                    System.out.println("Exiting...!");
+                    scan.close();
+                    break;
+                case 1:
+                    login();
+                    break;
+                case 2:
+                    register();
+                    break;
+            }
+
         }
-        switch(option){
-            case 0:
-                System.out.println("Exiting...!");
-                break;
-            case 1:
-                login();
-                break;
-            case 2:
-                register();
-                break;
+        catch (Exception e) {
+            e.printStackTrace();
         }
-        scan.close();
     }
 
     public boolean checkIfUsersCsvFileExists(){
@@ -108,21 +119,20 @@ public class Platform {
     }
 
     public void login(){
-        scan = new Scanner(System.in);
         System.out.println("----- LOGIN MENU -----");
         System.out.println("Insira o seu username!");
         username = scan.next();
         if(!checkIfUsersCsvFileExists()){
             System.out.println("Não existem utilizadores registados!");
-            start();
+            treatStartMenu();
         }
         else if(!checkIfUserIsRegistered(username)){
             System.out.println("Utilizador não existe! \nTente criar uma conta ou então fazer login com outro username!");
-            start();
+            treatStartMenu();
         }
 
         System.out.println("Insira a sua password!");
-        password = scan.next();
+        String password = scan.next();
 
         while (!checkIfPasswordIsCorrect(username, password)) {
                 System.out.println("Password errada! Tente novamente");
@@ -130,26 +140,25 @@ public class Platform {
         }
 
         System.out.println("Logado com sucesso!");
-        scan.close();
         initialMenu();
     }
 
     public void register(){
-        scan = new Scanner(System.in);
         System.out.println("----- REGISTER MENU -----");
         System.out.println("Insira o username que pretende registar!");
         username = scan.next();
         if(checkIfUsersCsvFileExists()){
             if(checkIfUserIsRegistered(username)){
                 System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
-                start();
+                treatStartMenu();
             }
-            System.out.println("Insira a password que pretende usar!");
-            password = scan.next();
-            saveUserToCsvFile(new User(username,password,Type.NORMAL));
-            System.out.println("Registado com sucesso!");
-            scan.close();
-            initialMenu();
+            else{
+                System.out.println("Insira a password que pretende usar!");
+                String password = scan.next();
+                saveUserToCsvFile(new User(username,password,Type.NORMAL));
+                System.out.println("Registado com sucesso!");
+                initialMenu();
+            }
         }
     }
 
