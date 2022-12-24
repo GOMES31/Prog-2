@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class Repository {
     private Map<Integer,Talent> talents;
@@ -20,18 +18,26 @@ public class Repository {
         clients = new ArrayList<>();
     }
 
+
     public Map<Integer,Talent> getTalents(){
         return talents;
     }
 
+    /**
+     * Método utilizado para adicionar um talento ao repositório
+     * @param talent
+     */
     public void addTalent(Talent talent){
         talents.put(talentsKey++,talent);
         System.out.println("Talento adicionado com sucesso!");
     }
 
+    /**
+     * Método utilizado para remover um talento do repositório
+     * @param key
+     */
     public void removeTalent(int key) {
         if (talents.containsKey(key)) {
-            // Cria um mapa novo com as chaves atualizadas
             Map<Integer, Talent> updatedTalents = new HashMap<>();
             int newKey = 0;
             for (Map.Entry<Integer, Talent> entry : talents.entrySet()) {
@@ -40,24 +46,70 @@ public class Repository {
                     newKey++;
                 }
             }
-
-            // Atualiza o mapa inicial
             talents = updatedTalents;
             System.out.println("Talento removido com sucesso!");
+        }
+    }
+
+    /**
+     * Método utilizado para editar informações de um talento
+     * @param key
+     * @param scan
+     */
+    public void editTalent(int key, Scanner scan){
+        Talent talent = talents.get(key);
+        System.out.println("O que pretende editar neste talento?");
+        try{
+            int option = scan.nextInt();
+            while(option < 0 || option > 3){
+                option = scan.nextInt();
+                if(option < 0 || option > 3) System.out.println("1 - Alterar email\n2 - Alterar preço por hora!\n3 - Alterar privacidade!\n4 - Gerir Skills\n5 - Gerir Experiências\n0 - [SAIR]");
+            }
+            switch(option) {
+                case 0:
+                    System.out.println("Exiting...!");
+                    scan.close();
+                    break;
+                case 1:
+                    talent.editMail(scan,talents);
+                    break;
+                case 2:
+                    talent.editPricePerHour(scan);
+                    break;
+                case 3:
+                    talent.editPrivacy();
+                    break;
+                case 4:
+                    talent.manageSkills();
+                    break;
+                case 5:
+                    talent.manageExperiences();
+                    break;
+            }
+        }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
         }
     }
 
     public Map<Integer,Skill> getSkills(){
         return skills;
     }
+
+    /**
+     * Método utilizado para adicionar uma skill ao repositório
+     * @param skill
+     */
     public void addSkill(Skill skill){
         skills.put(skillsKey++,skill);
         System.out.println("Skill adicionada com sucesso!");
     }
 
+    /**
+     * Método utilizado para adicionar uma skill ao repositório
+     * @param key
+     */
     public void removeSkill(int key){
         if (skills.containsKey(key)) {
-            // Cria um mapa novo com as chaves atualizadas
             Map<Integer, Skill> updatedSkills = new HashMap<>();
             int newKey = 0;
             for (Map.Entry<Integer,Skill> entry : skills.entrySet()) {
@@ -67,7 +119,6 @@ public class Repository {
                 }
             }
 
-            // Atualiza o mapa inicial
             skills = updatedSkills;
             System.out.print("Skill removida com sucesso!");
         }
@@ -76,13 +127,21 @@ public class Repository {
         return jobs;
     }
 
+    /**
+     * Método utilizado para adicionar uma Oferta de emprego ao repositório
+     * @param job
+     */
     public void addJob(Job job){
         jobs.put(jobsKey++,job);
         System.out.println("Oferta de Emprego adicionada com sucesso!");
     }
+
+    /**
+     * Método utilizado para remover uma Oferta de emprego do repositório
+     * @param key
+     */
     public void removeJob(int key){
         if (jobs.containsKey(key)) {
-            // Cria um mapa novo com as chaves atualizadas
             Map<Integer, Job> updatedJobs = new HashMap<>();
             int newKey = 0;
             for (Map.Entry<Integer,Job> entry : jobs.entrySet()) {
@@ -92,7 +151,6 @@ public class Repository {
                 }
             }
 
-            // Atualiza o mapa inicial
             jobs = updatedJobs;
             System.out.print("Oferta de Emprego removida com sucesso!");
         }
@@ -102,10 +160,18 @@ public class Repository {
         return clients;
     }
 
+    /**
+     * Método utilizado para adicionar um novo cliente ao repositório
+     * @param client
+     */
     public void addClient(String client){
         clients.add(client);
     }
 
+    /**
+     * Método utilizado para remover um cliente do repositório
+     * @param client
+     */
     public void removeClient(String client){
         for(String _client: clients){
             if(_client.equals(client)){
