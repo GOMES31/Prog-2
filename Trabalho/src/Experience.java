@@ -9,11 +9,11 @@ public class Experience {
 
 
 
-    public Experience(String title, String enterprise, String startDate, String endDate,DateTimeFormatter dateTimeFormatter) {
+    public Experience(String title, String enterprise, LocalDate startDate, LocalDate endDate) {
         this.title = title;
         this.enterprise = enterprise;
-        this.startDate = LocalDate.parse(startDate,dateTimeFormatter);
-        this.endDate = LocalDate.parse(endDate,dateTimeFormatter);
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public String getTitle() {

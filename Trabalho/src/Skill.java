@@ -17,6 +17,7 @@ public class Skill {
 
     public void setName(String name) {
         this.name = name;
+        System.out.println("Nome atualizado com sucesso!");
     }
 
     public int getId() {
@@ -37,5 +38,6 @@ public class Skill {
 
     public void setExpYears(double expYears) {
         this.expYears = expYears;
+        System.out.println("Anos de experiência atualizados com sucesso!");
     }
 }

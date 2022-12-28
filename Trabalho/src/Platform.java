@@ -2,9 +2,9 @@ import java.io.*;
 import java.time.DateTimeException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Platform {
     private Repository repository;
@@ -300,9 +300,9 @@ public class Platform {
             System.out.println("Se quiser ter informação mais detalhada de algum talento insira o id respetivo!");
             try{
                 int id = scan.nextInt();
-                while(id < 0){
+                while(id < 0 || !repository.getTalents().containsValue(id)){
                     id = scan.nextInt();
-                    if(id < 0) System.out.println("Insira um número positivo!");
+                    if(id < 0 || !repository.getTalents().containsValue(id)) System.out.println("Insira um id válido!");
                 }
                 // Consulta informação detalhada de um talento através do seu id
                 detailedInfo(id);
@@ -323,17 +323,18 @@ public class Platform {
 
             while(option < 0 || option > 1){
                 option = scan.nextInt();
-                if(option < 0 || option > 1) System.out.println("Opção Inválida!\n1 - Voltar ao menu de talentos!\n2 - Ver informação detalhada de outro talento!");
+                if(option < 0 || option > 1) System.out.println("Opção Inválida!\n1 - Voltar ao menu de talentos\n2 - Ver informação detalhada de outro talento");
             }
             switch(option){
                 case 1:
                     talentMenu();
                     break;
                 case 2:
+                    System.out.println("Insira o id do talento!");
                     int id = scan.nextInt();
-                    while(id < 0){
+                    while(id < 0 || !repository.getTalents().containsValue(id)){
                         id = scan.nextInt();
-                        if(id < 0) System.out.println("Insira um número positivo!");
+                        if(id < 0 || !repository.getTalents().containsValue(id)) System.out.println("Insira um id válido!");
                     }
                     // Consulta informação detalhada de um talento através do seu id
                     detailedInfo(id);
@@ -393,11 +394,15 @@ public class Platform {
                 System.out.println("Insira o país de origem:");
                 String country = scan.next();
 
-                System.out.println("Insira o mail do talento!");
+                System.out.println("Insira o mail do talento:");
                 String mail = scan.next();
 
-                System.out.println("Insira o preço por hora que o talento cobra!");
+                System.out.println("Insira o preço por hora que o talento cobra:");
                 double pricePerHour = scan.nextDouble();
+                while(pricePerHour < 0){
+                    pricePerHour = scan.nextDouble();
+                    if(pricePerHour < 0) System.out.println("Insira um valor superior a 0!");
+                }
 
                 Talent newTalent = new Talent(name,country,mail,pricePerHour);
                 repository.addTalent(newTalent);
@@ -415,11 +420,11 @@ public class Platform {
     public void addTalentProfileSubMenu(Talent talent){
         try{
             System.out.println("Que pretende fazer agora?");
-            System.out.println("\n1 - Adicionar uma skill ao talento!\n2 - Adicionar uma experiência ao talento!\n3 - Voltar ao menu de talentos!\n0 - [SAIR]");
+            System.out.println("\n1 - Adicionar uma skill ao talento\n2 - Adicionar uma experiência ao talento\n3 - Voltar ao menu de talentos\n0 - [SAIR]");
             int option = scan.nextInt();
             while(option < 0 || option > 3){
                 option = scan.nextInt();
-                if(option < 0 || option > 3) System.out.println("\n1 - Adicionar uma skill ao talento!\n2 - Adicionar uma experiência ao talento!\n3 - Voltar ao menu de talentos!\n0 - [SAIR]");
+                if(option < 0 || option > 3) System.out.println("Opção Inválida!\n1 - Adicionar uma skill ao talento\n2 - Adicionar uma experiência ao talento\n3 - Voltar ao menu de talentos\n0 - [SAIR]");
             }
             switch(option){
                 case 0:
@@ -458,11 +463,15 @@ public class Platform {
             System.out.println("Insira a data de início da experiência:");
             String startDateInput = scan.next();
 
-            System.out.println("Insira a data de fim da experiência!");
+            System.out.println("Insira a data de fim da experiência:");
             String endDateInput = scan.next();
 
+
+
             try{
-                Experience newExperience = new Experience(title,enterprise,startDateInput,endDateInput,dateFormatter);
+                LocalDate startDate = LocalDate.parse(startDateInput,dateFormatter);
+                LocalDate endDate = LocalDate.parse(endDateInput,dateFormatter);
+                Experience newExperience = new Experience(title,enterprise,startDate,endDate);
                 talent.addExperience(newExperience);
                 addTalentProfileSubMenu(talent);
 
@@ -488,6 +497,10 @@ public class Platform {
 
             System.out.println("Número de anos de experiência com essa skill:");
             double expYears = scan.nextDouble();
+            while(expYears < 0){
+                expYears = scan.nextDouble();
+                if(expYears < 0) System.out.println("Insira um valor superior a 0!");
+            }
 
             try{
                 Skill newSkill = new Skill(name,field,expYears);
@@ -518,7 +531,7 @@ public class Platform {
                         + talent.getCountry() + ",\tPreço por hora: " + talent.getPricePerHour());
                 System.out.println("----------------------");
             }
-            System.out.println("Insira o id do perfil que pretende editar!");
+            System.out.println("Insira o id do perfil que pretende editar:");
             try{
                 int id = scan.nextInt();
                 editTalentProfileSubMenu(id);
@@ -540,11 +553,11 @@ public class Platform {
                 talentMenu();
             }
             System.out.println("Que pretende fazer?");
-            System.out.println("1 - Eliminar talento\n2 - Editar atributos do talento!\n3 - Voltar ao menu de talentos!\n0 - [SAIR]");
+            System.out.println("1 - Eliminar talento\n2 - Editar atributos do talento\n3 - Voltar ao menu de talentos\n0 - [SAIR]");
             int option = scan.nextInt();
             while(option < 0 || option > 3){
                 option = scan.nextInt();
-                if(option < 0 || option > 3) System.out.println("1 - Eliminar talento\n2 - Editar atributos do talento!\n3 - Voltar ao menu de talentos!\n0 - [SAIR]");
+                if(option < 0 || option > 3) System.out.println("Opção Inválida!\n1 - Eliminar talento\n2 - Editar atributos do talento\n3 - Voltar ao menu de talentos\n0 - [SAIR]");
             }
             switch(option){
                 case 0:
@@ -567,6 +580,8 @@ public class Platform {
             System.out.println("Insira um número!");
         }
     }
+
+
 
     /**
      * Método utilizado para fazer o tratamento do menu de Ofertas de emprego

@@ -1,8 +1,4 @@
-import netscape.javascript.JSObject;
-
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.util.ArrayList;
 
 public class User {
     private String username;
@@ -10,10 +6,13 @@ public class User {
 
     private Type type;
 
+    private ArrayList<History> history;
+
     public User(String username, String password,Type type){
             this.username = username;
             this.password = password;
             this.type = type;
+            history = new ArrayList<>();
     }
 
     public String getUsername(){
@@ -27,6 +26,14 @@ public class User {
 
     public void setType(Type type){
         this.type = type;
+    }
+
+    public ArrayList<History> getHistory(){
+        return history;
+    }
+
+    public void addNewHistory(History newHistory){
+        history.add(newHistory);
     }
 
 }

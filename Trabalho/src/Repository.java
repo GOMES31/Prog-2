@@ -1,4 +1,6 @@
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Repository {
     private Map<Integer,Talent> talents;
@@ -32,64 +34,6 @@ public class Repository {
         System.out.println("Talento adicionado com sucesso!");
     }
 
-    /**
-     * Método utilizado para remover um talento do repositório
-     * @param key
-     */
-    public void removeTalent(int key) {
-        if (talents.containsKey(key)) {
-            Map<Integer, Talent> updatedTalents = new HashMap<>();
-            int newKey = 0;
-            for (Map.Entry<Integer, Talent> entry : talents.entrySet()) {
-                if (entry.getKey() != key) {
-                    updatedTalents.put(newKey, entry.getValue());
-                    newKey++;
-                }
-            }
-            talents = updatedTalents;
-            System.out.println("Talento removido com sucesso!");
-        }
-    }
-
-    /**
-     * Método utilizado para editar informações de um talento
-     * @param key
-     * @param scan
-     */
-    public void editTalent(int key, Scanner scan){
-        Talent talent = talents.get(key);
-        System.out.println("O que pretende editar neste talento?");
-        try{
-            int option = scan.nextInt();
-            while(option < 0 || option > 3){
-                option = scan.nextInt();
-                if(option < 0 || option > 3) System.out.println("1 - Alterar email\n2 - Alterar preço por hora!\n3 - Alterar privacidade!\n4 - Gerir Skills\n5 - Gerir Experiências\n0 - [SAIR]");
-            }
-            switch(option) {
-                case 0:
-                    System.out.println("Exiting...!");
-                    scan.close();
-                    break;
-                case 1:
-                    talent.editMail(scan,talents);
-                    break;
-                case 2:
-                    talent.editPricePerHour(scan);
-                    break;
-                case 3:
-                    talent.editPrivacy();
-                    break;
-                case 4:
-                    talent.manageSkills();
-                    break;
-                case 5:
-                    talent.manageExperiences();
-                    break;
-            }
-        }catch(InputMismatchException e){
-                System.out.println("Input inválido! Insira um número!");
-        }
-    }
 
     public Map<Integer,Skill> getSkills(){
         return skills;
@@ -182,4 +126,61 @@ public class Repository {
         }
         System.out.println("Cliente não encontrado!");
     }
- }
+
+    /**
+     * Método utilizado para remover um talento do repositório
+     * @param key
+     */
+    public void removeTalent(int key) {
+        if (talents.containsKey(key)) {
+            Map<Integer, Talent> updatedTalents = new HashMap<>();
+            int newKey = 0;
+            for (Map.Entry<Integer, Talent> entry : talents.entrySet()) {
+                if (entry.getKey() != key) {
+                    updatedTalents.put(newKey, entry.getValue());
+                    newKey++;
+                }
+            }
+            talents = updatedTalents;
+            System.out.println("Talento removido com sucesso!");
+        }
+    }
+
+    /**
+     * Método utilizado para editar informações de um talento
+     * @param key
+     * @param scan
+     */
+    public void editTalent(int key, Scanner scan){
+        Talent talent = talents.get(key);
+        System.out.println("O que pretende editar neste talento?");
+        try{
+            int option = scan.nextInt();
+            while(option < 1 || option > 6){
+                option = scan.nextInt();
+                if(option < 1 || option > 6) System.out.println("Opção Inválida!\n1 - Alterar email\n2 - Alterar preço por hora\n3 - Alterar privacidade!\n4 - Gerir Skills\n5 - Gerir Experiências");
+            }
+            switch(option) {
+                case 1:
+                    talent.editMail(scan,talents);
+                    break;
+                case 2:
+                    talent.editPricePerHour(scan);
+                    break;
+                case 3:
+                    talent.editPrivacy();
+                    break;
+                case 4:
+                    talent.manageSkills(scan);
+                    break;
+                case 5:
+                    talent.manageExperiences(scan);
+                    break;
+            }
+        }catch(InputMismatchException e){
+            System.out.println("Input inválido! Insira um número!");
+        }
+    }
+
+
+}
