@@ -20,16 +20,15 @@ public class Skill {
         System.out.println("Nome atualizado com sucesso!");
     }
 
+    public void setId(int id){
+        this.id = id;
+    }
     public int getId() {
         return id;
     }
 
     public String getField() {
         return field;
-    }
-
-    public void setField(String field) {
-        this.field = field;
     }
 
     public double getExpYears() {

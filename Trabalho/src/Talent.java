@@ -107,49 +107,49 @@ public class Talent {
     }
 
     /**
-     * Método que imprime um sub menu de gestão das skills de um talento
-     * @param scan
+     * Método utilizado para remover uma skill de um talento e dar update ao repositório principal
      */
-    public void manageSkills(Scanner scan){
-        System.out.println("----- MANAGE SKILLS -----\n1 - Apagar Skill\2 - Adicionar Skill\n3 - Editar nome de uma skill\4 - Editar anos de experiência de uma skill!");
-        try{
-            int option = scan.nextInt();
-            while(option < 1 || option > 4){
-                option = scan.nextInt();
-                if(option < 1 || option > 4) System.out.println("Opção Inválida!\n1 - Apagar Skill\2 - Adicionar Skill\n3 - Editar nome de uma skill\4 - Editar anos de experiência de uma skill!");
-            }
-            switch(option){
-                case 1:
-                    removeSkill();
-                    break;
-                case 2:
-                    addNewSkill(scan);
-                    break;
-                case 3:
-                    editSkillName(scan);
-                    break;
-                case 4:
-                    editSkillExpYears(scan);
-                    break;
-            }
-        }catch(InputMismatchException e){
-            System.out.println("Input inválido! Insira um número!");
+
+    public Skill removeSkill(Scanner scan){
+        Skill removedSkill;
+        if(skills == null){
+            System.out.println("Este talento não tem skills registadas!");
         }
+        else{
+            try{
+                System.out.println("----- LISTA DE SKILLS -----");
+                for(Skill skill: skills){
+                    System.out.println(skill.getId() + "\tNome: " + skill.getName());
+                }
+                System.out.println("Insira o id da skill que pretende remover:");
+                try{
+                    int id = scan.nextInt();
+                    while(id < 0 || !skills.contains(skills.get(id))){
+                        id = scan.nextInt();
+                        if(id < 0 || !skills.contains(skills.get(id))) System.out.println("Insira um id válido!");
+                    }
+
+                    removedSkill = skills.get(id);
+                    skills.remove(id);
+                    int skillId = 0;
+                    for(Skill skill: skills){
+                        skill.setId(skillId);
+                        skillId++;
+                    }
+                    System.out.println("Skill removida com sucesso do perfil de talento!");
+                    return removedSkill;
+                }catch(InputMismatchException e){
+                    System.out.println("Input inválido! Insira um número!");
+                }
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
-    /**
-     * Método utilizado para remover uma skill de um talento
-     */
-
-    public void removeSkill(){
-        if(skills == null) System.out.println("Este talento não tem skills registadas!");
-    }
-
-    /**
-     * Método utilizado para obter os detalhes de uma skill nova a adicionar ao talento
-     */
-
-    public void addNewSkill(Scanner scan){
+    public Skill addNewSkill(Scanner scan){
+        Skill addedSkill;
         try{
             System.out.println("Nome da skill:");
             String name = scan.next();
@@ -163,109 +163,130 @@ public class Talent {
                 expYears = scan.nextDouble();
                 if(expYears < 0) System.out.println("Insira um valor superior a 0!");
             }
-            skills.add(new Skill(name,field,expYears));
+            addedSkill = new Skill(name,field,expYears);
+            if(skills.contains(addedSkill)){
+                System.out.println("Essa skill já existe no repositório de skills do talento!");
+                return null;
+            }
+            skills.add(addedSkill);
+            return addedSkill;
         }catch(InputMismatchException e) {
             System.out.println("Input inválido!");
         }
+        return null;
     }
 
     /**
      * Método utilizado para editar o nome de uma skill
      */
 
-    public void editSkillName(Scanner scan){
+    public Skill editSkillName(Scanner scan){
+        Skill editedSkill;
         System.out.println("----- LISTA DE SKILLS -----");
         for(Skill skill: skills){
             System.out.println(skill.getId() + "\tNome: " + skill.getName());
         }
         System.out.println("Insira o id da skill que pretende editar o nome:");
         try{
-            int id = scan.nextInt();
-            while(id < 0 || !skills.contains(id)){
-                id = scan.nextInt();
-                if(id < 0 || !skills.contains(id)) System.out.println("Insira um id válido!");
+            int id;
+            while (true) {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfSkillExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    } else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido!");
+                    scan.nextDouble();
+                }
             }
             System.out.println("Insira o novo nome para a skill:");
             String name = scan.next();
             skills.get(id).setName(name);
-        }catch(InputMismatchException e){
-            System.out.println("Input inválido! Insira um número!");
+
+            editedSkill = skills.get(id);
+            return editedSkill;
+        }catch(Exception e){
+            e.printStackTrace();
         }
+        return null;
     }
 
+    public boolean checkIfSkillExists(int id){
+        for(Skill skill: skills){
+            if(skill.getId() == id){
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * Método utilizado para editar os anos de experiência de uma skill
      */
 
-    public void editSkillExpYears(Scanner scan){
+    public Skill editSkillExpYears(Scanner scan){
+        Skill editedSkill;
         System.out.println("----- LISTA DE SKILLS -----");
         for(Skill skill: skills){
             System.out.println(skill.getId() + "\tNome: " + skill.getName() + ",\tAnos Experiência: " +  skill.getExpYears());
         }
         System.out.println("Insira o id da skill que pretende editar os anos de experiência:");
         try{
-            int id = scan.nextInt();
-            while(id < 0 || !skills.contains(id)){
-                id = scan.nextInt();
-                if(id < 0 || !skills.contains(id)) System.out.println("Insira um id válido!");
+            int id;
+            while (true) {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfSkillExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    } else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido!");
+                    scan.nextDouble();
+                }
             }
             System.out.println("Insira o número de anos de experiência: ");
-            double expYears = scan.nextDouble();
-            while(expYears < skills.get(id).getExpYears() || expYears < 0){
-                expYears = scan.nextDouble();
-                if(expYears < skills.get(id).getExpYears() || expYears < 0){
-                    System.out.println("O número de anos de experiência novo não pode ser inferior ao número de anos de experiência registado! Nº anos: " + skills.get(id).getExpYears());
+            double expYears;
+            while (true) {
+                try {
+                    expYears = scan.nextDouble();
+                    if(expYears < skills.get(id).getExpYears() || expYears < 0){
+                        System.out.println("O número de anos de experiência novo não pode ser inferior ao número de anos de experiência registado! Nº anos: " + skills.get(id).getExpYears());
+                    }else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido!");
+                    scan.nextDouble();
+
                 }
             }
             skills.get(id).setExpYears(expYears);
-        }catch(InputMismatchException e){
+
+            editedSkill = skills.get(id);
+            return editedSkill;
+        }catch(Exception e){
             System.out.println("Input inválido! Insira um número!");
         }
+        return null;
     }
 
-    /**
-     * Método que imprime um sub menu de gestão das experiências de um talento
-     * @param scan
-     */
-    public void manageExperiences(Scanner scan){
-        System.out.println("----- MANAGE SKILLS -----\n1 - Apagar Experiência\2 - Adicionar Skill\n3 - Editar nome de uma skill\4 - Editar anos de experiência de uma skill");
-        try{
-            int option = scan.nextInt();
-            while(option < 1 || option > 3){
-                option = scan.nextInt();
-                if(option < 1 || option > 3) System.out.println("Opção Inválida!\n1 - Apagar Experiência\2 - Adicionar nova experiência\n3 - Editar nome de experiência");
-            }
-            switch(option){
-                case 1:
-                    removeExperience();
-                    break;
-                case 2:
-                    addNewExperience(scan);
-                    break;
-                case 3:
-                    editExperienceTitle(scan);
-                    break;
-            }
-        }catch(InputMismatchException e){
-            System.out.println("Input inválido! Insira um número!");
-        }
-    }
-
-    /**
-     * Método utilizado para editar o preço que um talento cobra por hora
-     * @param scan
-     */
     public void editPricePerHour(Scanner scan){
-        try{
-            System.out.println("Insira o novo preço por hora que pretende cobrar:");
-            double pricePerHour = scan.nextDouble();
-            while(pricePerHour < 0){
+        while (true) {
+            try {
                 pricePerHour = scan.nextDouble();
-                if(pricePerHour < 0) System.out.println("Insira um valor superior a 0!");
+                if (pricePerHour < 0) {
+                    System.out.println("Insira um valor superior a 0!");
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido! Insira novamente o preço por hora:");
+                scan.nextDouble();
             }
-            setPricePerHour(pricePerHour);
-        }catch(InputMismatchException e){
-            System.out.println("Input inválido!");
         }
     }
 
@@ -279,14 +300,14 @@ public class Talent {
         System.out.println("Insira o email que pretende utilizar:");
         try{
             String mail = scan.next();
-            checkIfMailIsValid(mail,talents);
-            if(checkIfMailIsValid(mail,talents)) setMail(mail);
-            else{
+            if(!checkIfMailIsValid(mail,talents)){
                 while(!checkIfMailIsValid(mail,talents)){
                     mail = scan.next();
                     System.out.println("Email inválido!");
                 }
-                System.out.println("Email atualizado com sucesso!");
+            }
+            else{
+                setMail(mail);
             }
         }catch(InputMismatchException e){
             System.out.println("Input inválido!");
@@ -300,8 +321,11 @@ public class Talent {
      * @return true se o mail for válido
      */
     public boolean checkIfMailIsValid(String mail, Map<Integer, Talent> talents){
-        if(talents.containsValue(mail)) return false;
-
+        for(Talent _talent: talents.values()){
+            if(_talent.getMail().equals(mail)){
+                return false;
+            }
+        }
         String emailPattern = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
         Pattern pattern = Pattern.compile(emailPattern);
         Matcher matcher = pattern.matcher(mail);

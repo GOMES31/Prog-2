@@ -7,6 +7,9 @@ public class Experience {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    private int id;
+
+    private static int currentId = 0;
 
 
     public Experience(String title, String enterprise, LocalDate startDate, LocalDate endDate) {
@@ -14,6 +17,10 @@ public class Experience {
         this.enterprise = enterprise;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.id = currentId++;
+    }
+    public int getId() {
+        return id;
     }
 
     public String getTitle() {

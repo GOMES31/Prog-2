@@ -1,0 +1,12 @@
+while (true) {
+                try {
+                    pricePerHour = scan.nextDouble();
+                    if (pricePerHour < 0) {
+                        System.out.println("Insira um valor superior a 0!");
+                    }else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira novamente o preço por hora:");
+                    scan.nextDouble();
+                }
