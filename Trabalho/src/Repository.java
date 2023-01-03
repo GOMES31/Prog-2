@@ -294,9 +294,13 @@ public class Repository {
                 System.out.println("A skill não existe no repositório principal!");
             }
             else{
-                Skill editedSkill = skills.get(skill);
-                editedSkill.setName(skill.getName());
-                skills.replace(getSkillMapKey(skill),skill,editedSkill);
+                for(Skill _skill: skills.values()){
+                    if(_skill.equals(skill)){
+                        _skill.setName(skill.getName());
+                        skills.replace(getSkillMapKey(skill),skill,_skill);
+                        break;
+                    }
+                }
             }
         }catch(Exception e){
             e.printStackTrace();
@@ -312,9 +316,13 @@ public class Repository {
                 System.out.println("A skill não existe no repositório principal!");
             }
             else{
-                Skill editedSkill = skills.get(skill);
-                editedSkill.setExpYears(skill.getExpYears());
-                skills.replace(getSkillMapKey(skill),skill,editedSkill);
+                for(Skill _skill: skills.values()){
+                    if(_skill.equals(skill)){
+                        _skill.setExpYears(skill.getExpYears());
+                        skills.replace(getSkillMapKey(skill),skill,_skill);
+                        break;
+                    }
+                }
             }
         }catch(Exception e){
             e.printStackTrace();

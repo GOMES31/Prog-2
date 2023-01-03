@@ -98,17 +98,19 @@ public class Platform {
     public void treatStartMenu(){
         defineStartMenu();
         System.out.println(String.join("\n", startMenu) + "\nEscolha uma opção!");
-        int option = scan.nextInt();
+        int option;
         try {
-            while(option < 0 || option > 2){
+            while(true){
                 try {
                     option = scan.nextInt();
+                    if(option < 0 || option > 2) System.out.println("Opção Inválida!\n" + String.join("\n", startMenu));
+                    else{
+                        break;
+                    }
                 }catch(InputMismatchException e){
                     System.out.println("Input inválido! Insira um número!");
                     scan.next();
-                    continue;
                 }
-                if(option < 0 || option > 2) System.out.println("Opção Inválida!\n" + String.join("\n", startMenu));
             }
             switch(option){
                 case 0:
@@ -204,7 +206,6 @@ public class Platform {
         defineInitialMenu();
         System.out.println(String.join("\n", initialMenu) + "\nEscolha uma opção!");
         int option;
-
         try {
             while(true){
                 try {
@@ -245,7 +246,7 @@ public class Platform {
     public void talentMenu(){
         defineTalentMenu();
         System.out.println(String.join("\n", talentMenu) + "\nEscolha uma opção!");
-        int option = scan.nextInt();
+        int option;
         try {
             while(true){
                 try {
@@ -449,7 +450,7 @@ public class Platform {
                         System.out.println("Não existem skills registadas!");
                         break;
                     }
-                    lineFour.append("Id: ").append(skill.getId()).append("\tNome: ").append(skill.getName()).append("\tÁrea: ").append(skill.getField()).append("\tAnos experiência: ").append(skill.getExpYears());
+                    lineFour.append("\nId: ").append(skill.getId()).append("\tNome: ").append(skill.getName()).append("\tÁrea: ").append(skill.getField()).append("\tAnos experiência: ").append(skill.getExpYears());
                 }
 
                 String detailedInfo = lineOne + "\n" + lineTwo + "\n" + lineThree + "\n" + lineFour;
@@ -478,6 +479,7 @@ public class Platform {
 
             while(!repository.checkIfMailIsValid(mail)) {
                 mail = scan.next();
+                System.out.println("Mail inválido!");
             }
 
             System.out.println("Insira o preço por hora que o talento cobra:");
