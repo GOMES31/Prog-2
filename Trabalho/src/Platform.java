@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
 
 public class Platform {
     private Repository repository;
-    private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu;
+    private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu,clientsMenu;
 
     private String username;
 
@@ -19,10 +19,12 @@ public class Platform {
     public Platform(){
         repository = new Repository();
         startMenu = new String[4];
-        initialMenu = new String[5];
+        initialMenu = new String[8];
         talentMenu = new String[7];
         skillsMenu = new String[7];
-        jobsMenu = new String[7];
+        jobsMenu = new String[8];
+        clientsMenu = new String[6];
+
     }
 
     /**
@@ -43,7 +45,10 @@ public class Platform {
         initialMenu[1] = "1 - Menu Talentos";
         initialMenu[2] = "2 - Menu Empregador";
         initialMenu[3] = "3 - Menu Skills";
-        initialMenu[4] = "0 - [SAIR]";
+        initialMenu[4] = "4 - Menu Clientes";
+        initialMenu[5] = "5 - Obter relatório gastos mensais por país";
+        initialMenu[6] = "6 - Obter relatório gastos mensais por skill";
+        initialMenu[7] = "0 - [SAIR]";
     }
 
     /**
@@ -51,9 +56,9 @@ public class Platform {
      */
     public void defineTalentMenu(){
         talentMenu[0] = "----- MENU TALENTOS -----";
-        talentMenu[1] = "1 - Listar Perfil de Talento";
-        talentMenu[2] = "2 - Adicionar Perfil de Talento";
-        talentMenu[3] = "3 - Editar Perfil de Talento";
+        talentMenu[1] = "1 - Listar perfil de talento";
+        talentMenu[2] = "2 - Adicionar perfil de talento";
+        talentMenu[3] = "3 - Editar perfil de talento";
         talentMenu[4] = "4 - Procurar talentos";
         talentMenu[5] = "5 - VOLTAR A TRÁS!";
         talentMenu[6] = "0 - [SAIR]";
@@ -68,8 +73,9 @@ public class Platform {
         jobsMenu[2] = "2 - Adicionar trabalho";
         jobsMenu[3] = "3 - Eliminar trabalho";
         jobsMenu[4] = "4 - Editar trabalho";
-        jobsMenu[5] = "5 - VOLTAR A TRÁS!";
-        jobsMenu[6] = "0 - [SAIR]";
+        jobsMenu[5] = "5 - Filtrar talentos para um trabalho";
+        jobsMenu[6] = "6 - VOLTAR A TRÁS!";
+        jobsMenu[7] = "0 - [SAIR]";
     }
 
     /**
@@ -77,14 +83,22 @@ public class Platform {
      */
     public void defineSkillsMenu(){
         skillsMenu[0] = "----- MENU SKILLS -----";
-        skillsMenu[1] = "1 - Listar Skills";
-        skillsMenu[2] = "2 - Adicionar Skill";
-        skillsMenu[3] = "3 - Eliminar Skill";
-        skillsMenu[4] = "4 - Editar Skill";
+        skillsMenu[1] = "1 - Listar skills";
+        skillsMenu[2] = "2 - Adicionar skill";
+        skillsMenu[3] = "3 - Eliminar skill";
+        skillsMenu[4] = "4 - Editar skill";
         skillsMenu[5] = "5 - VOLTAR A TRÁS!";
         skillsMenu[6] = "0 - [SAIR]";
     }
 
+    public void defineClientsMenu(){
+        clientsMenu[0] = "----- MENU CLIENTES-----";
+        clientsMenu[1] = "1 - Listar clientes";
+        clientsMenu[2] = "2 - Adicionar cliente";
+        clientsMenu[3] = "3 - Eliminar cliente";
+        clientsMenu[4] = "4 - VOLTAR A TRÁS!";
+        clientsMenu[5] = "0 - [SAIR]";
+    }
     /**
      * Método que inicializa o programa e o Scanner
      */
@@ -206,7 +220,7 @@ public class Platform {
             while(true){
                 try {
                     option = scan.nextInt();
-                        if(option < 0 || option > 3) System.out.println("Opção Inválida!\n" + String.join("\n", initialMenu));
+                        if(option < 0 || option > 6) System.out.println("Opção Inválida!\n" + String.join("\n", initialMenu));
                         else{
                             break;
                         }
@@ -229,9 +243,53 @@ public class Platform {
                 case 3:
                     skillsMenu();
                     break;
+                case 4:
+                    clientsMenu();
+                    break;
+                case 5:
+                    getMediumMonthlyWageByCountry();
+                    break;
+                case 6:
+                    getMediumMonthlyWageBySkill();
+                    break;
             }
     }
 
+    public void getMediumMonthlyWageByCountry(){
+        if(repository.getTalents().isEmpty()){
+            System.out.println("Não existem talentos registados para obter informação!");
+            initialMenu();
+        }
+        System.out.println("----- RELATÓRIO MENSAL POR PAÍS -----");
+        System.out.println("Insira o nome do país que pretende ter o relatório:");
+        String country1st = scan.next();
+        String country2nd = scan.nextLine();
+
+        String country = String.join(country1st,"\t",country2nd);
+        System.out.println("----- RESULTADO -----");
+        repository.getMediumMonthlyWageByCountry(country);
+
+        initialMenu();
+
+    }
+
+    public void getMediumMonthlyWageBySkill(){
+        if(repository.getTalents().isEmpty()){
+            System.out.println("Não existem talentos registados para obter informação!");
+            initialMenu();
+        }
+        System.out.println("----- RELATÓRIO MENSAL POR SKILL -----");
+        System.out.println("Insira o nome da skill que pretende ter o relatório:");
+        String name1st = scan.next();
+        String name2nd = scan.nextLine();
+
+        String name = String.join(name1st,"\t",name2nd);
+
+        System.out.println("----- RESULTADO -----");
+        repository.getMediumMonthlyWageBySkill(name);
+
+        initialMenu();
+    }
     /**
      * Método utilizado para fazer o tratamento do MENU DE TALENTOS
      */
@@ -685,7 +743,7 @@ public class Platform {
             while(true){
                 try {
                     option = scan.nextInt();
-                    if(option < 0 || option > 5) System.out.println("Opção Inválida!\n" + String.join("\n", jobsMenu));
+                    if(option < 0 || option > 6) System.out.println("Opção Inválida!\n" + String.join("\n", jobsMenu));
                     else{
                         break;
                     }
@@ -700,24 +758,140 @@ public class Platform {
                     scan.close();
                     break;
                 case 1:
-//    TODO -                listJobs();
+                    repository.listJobs();
+                    jobsMenu();
                     break;
                 case 2:
-//    TODO -                addJob();
+                    repository.addJob(scan);
+                    jobsMenu();
                     break;
                 case 3:
-//    TODO -                deleteJob();
+                    repository.deleteJob(scan);
+                    jobsMenu();
                     break;
                 case 4:
-//    TODO -                editJob();
+                    editJobMenu();
                     break;
                 case 5:
+                    filterTalentsForJob();
+                    jobsMenu();
+                    break;
+                case 6:
                     initialMenu();
                     break;
             }
 
     }
 
+    public void filterTalentsForJob(){
+        System.out.println("----- PROCURAR TALENTOS -----");
+        if(repository.getTalents().isEmpty()){
+            System.out.println("Não existem talentos registados!");
+            return;
+        }
+
+        repository.listJobs();
+        System.out.println("Insira o id do trabalho que pretende encontrar talentos:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !repository.checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        ArrayList<String> requiredSkills = repository.getJobs().get(id).getSkills();
+        StringBuilder filters= new StringBuilder();
+        if(requiredSkills!=null){
+            for(String skill: requiredSkills){
+                filters.append(skill).append("\t");
+            }
+        }
+
+        System.out.println("----- RESULTADO -----");
+        System.out.println("Filtros: " + filters.toString().toLowerCase());
+
+        ArrayList<Talent> matchingTalents = repository.filterTalentsForJob(requiredSkills);
+        double totalHours = repository.getJobs().get(id).getTotalHours();
+        if (matchingTalents == null) {
+            System.out.println("Não existem talentos registados!");
+            return;
+        }
+
+        if (matchingTalents.isEmpty()) {
+            System.out.println("Nenhum talento encontrado com esse combo de skills!");
+            return;
+        }
+
+        // Imprime os talentos por valor total
+        for (Talent talent : matchingTalents) {
+            double value = talent.getPricePerHour() * totalHours;
+            double roundedValue = Math.round(value * 100.0) / 100.0;
+            System.out.println("Nome: " + talent.getName()+ "\tPreço total: " + roundedValue + "\tPaís: " + talent.getCountry());
+        }
+
+    }
+
+    public void editJobMenu(){
+        if(repository.getJobs().isEmpty()){
+                System.out.println("Não existem ofertas de emprego registadas!");
+                jobsMenu();
+        }
+        System.out.println("----- EDITAR TRABALHO -----");
+        System.out.println("1 - Voltar ao menu de trabalhos\n2 - Editar Titulo\n3 - Editar Categoria\n4 - Editar skills necessárias\n5 - Editar descrição\n6 - Editar número de horas totais");
+        int option;
+        while(true){
+            try {
+                option = scan.nextInt();
+                if(option < 1 || option > 6) System.out.println("Opção Inválida!\n" + String.join("\n", jobsMenu));
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+            }
+        }
+        switch(option){
+            case 1:
+                jobsMenu();
+                break;
+            case 2:
+                repository.editTitle(scan);
+                jobsMenu();
+                break;
+            case 3:
+                repository.editCategory(scan);
+                jobsMenu();
+                break;
+            case 4:
+                repository.editRequiredSkills(scan);
+                jobsMenu();
+                break;
+            case 5:
+                repository.editDescription(scan);
+                jobsMenu();
+                break;
+            case 6:
+                repository.editTotalHours(scan);
+                jobsMenu();
+                break;
+        }
+
+    }
     /**
      * Método utilizado para fazer o tratamento do menu de Skills
      */
@@ -764,6 +938,44 @@ public class Platform {
             }
     }
 
+    public void clientsMenu(){
+        defineClientsMenu();
+        System.out.println(String.join("\n", clientsMenu) + "\nEscolha uma opção!");
+        int option;
+        while(true){
+            try {
+                option = scan.nextInt();
+                if(option < 0 || option > 4) System.out.println("Opção Inválida!\n" + String.join("\n", clientsMenu));
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+            }
+        }
+        switch(option){
+            case 0:
+                System.out.println("Exiting...!");
+                scan.close();
+                break;
+            case 1:
+                repository.listClients();
+                clientsMenu();
+                break;
+            case 2:
+                repository.addClient(scan);
+                clientsMenu();
+                break;
+            case 3:
+                repository.removeClient(scan);
+                clientsMenu();
+                break;
+            case 4:
+                initialMenu();
+                break;
+        }
+    }
     /**
      * Método utilizado para ver se um utilizador está registado no ficheiro users.csv
      * @param username

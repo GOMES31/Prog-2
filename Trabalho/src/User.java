@@ -6,13 +6,13 @@ public class User {
 
     private Type type;
 
-    private ArrayList<History> history;
+    private History history;
 
     public User(String username, String password,Type type){
             this.username = username;
             this.password = password;
             this.type = type;
-            history = new ArrayList<>();
+            history = new History();
     }
 
     public String getUsername(){
@@ -28,12 +28,12 @@ public class User {
         this.type = type;
     }
 
-    public ArrayList<History> getHistory(){
+    public History getHistory(){
         return history;
     }
 
-    public void addNewHistory(History newHistory){
-        history.add(newHistory);
+    public void setHistory(History history){
+        this.history = history;
     }
 
 }

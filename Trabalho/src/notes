@@ -1,1 +1,23 @@
+System.out.println("Insira as skills para este trabalho!\n> Insira numa só linha separado por virgulas. Exemplo: JAVA,PHP,etc.");
+        String skillsString;
+        String[] skills = null;
+        try{
+            skillsString = scan.next();
+            skills = skillsString.split(",");
+        }catch(Exception e){
+            System.out.println("Ocorreu um erro! Insira os filtros denovo!");
+            scan.next();
+        }
 
+        ArrayList<String> requiredSkills = new ArrayList<>(Arrays.asList(skills));
+
+        System.out.println("Insira uma breve descrição do trabalho!");
+        String desc1st = scan.next();
+        String desc2nd = scan.nextLine();
+
+        String description = String.join(desc1st,"\t",desc2nd);
+
+
+
+        jobs.put(jobsKey++,new Job(title,category,requiredSkills,description,totalHours));
+        System.out.println("Trabalho adicionado com sucesso ao repositório!");

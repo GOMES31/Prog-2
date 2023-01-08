@@ -55,60 +55,497 @@ public class Repository {
     public void setJobs(Map<Integer,Job> jobs){
         this.jobs = jobs;
     }
-    /**
-     * Método utilizado para adicionar uma Oferta de emprego ao repositório
-     * @param job
-     */
-    public void addJob(Job job){
-        jobs.put(jobsKey++,job);
-        System.out.println("Oferta de Emprego adicionada com sucesso!");
+
+
+    public void addJob(Scanner scan){
+        System.out.println("------ ADICIONAR TRABALHO -----");
+        System.out.println("Título do trabalho:");
+        String title1st = scan.next();
+        String title2nd = scan.nextLine();
+
+        String title = String.join(title1st,"\t",title2nd);
+        while(checkIfTitleIsInUse(title)){
+            System.out.println("Já existe um trabalho com esse título! Insira outro!");
+            title1st = scan.next();
+            title2nd = scan.nextLine();
+            title = String.join(title1st,"\t",title2nd);
+        }
+
+        System.out.println("Categoria do trabalho:");
+        String category1st = scan.next();
+        String category2nd = scan.nextLine();
+
+        String category = String.join(category1st,"\t",category2nd);
+
+        System.out.println("Insira as skills para este trabalho!\n> Insira numa só linha separado por virgulas. Exemplo: JAVA,PHP,etc.");
+        String skillsString;
+        String[] skills = null;
+        try{
+            skillsString = scan.next();
+            skills = skillsString.split(",");
+        }catch(Exception e){
+            System.out.println("Ocorreu um erro! Insira os filtros denovo!");
+            scan.next();
+        }
+
+
+        ArrayList<String> requiredSkills = new ArrayList<>(Arrays.asList(skills));
+
+        System.out.println("Insira uma breve descrição do trabalho!");
+        String desc1st = scan.next();
+        String desc2nd = scan.nextLine();
+
+        String description = String.join(desc1st,"\t",desc2nd);
+
+        System.out.println("Insira o número total de horas do trabalho: ");
+        double totalHours;
+        while (true) {
+            try {
+                totalHours = scan.nextDouble();
+                if (totalHours < 0) {
+                    System.out.println("Insira um valor superior a 0!");
+                    scan.next();
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido! Insira novamente o número total de horas:");
+                scan.next();
+            }
+        }
+
+        jobs.put(jobsKey++,new Job(title,category,requiredSkills,description,totalHours));
+        System.out.println("Trabalho adicionado com sucesso ao repositório!");
     }
 
-    /**
-     * Método utilizado para remover uma Oferta de emprego do repositório
-     * @param key
-     */
-    public void removeJob(int key){
-        if (jobs.containsKey(key)) {
-            Map<Integer, Job> updatedJobs = new HashMap<>();
-            int newKey = 0;
-            for (Map.Entry<Integer,Job> entry : jobs.entrySet()) {
-                if (entry.getKey() != key) {
-                    updatedJobs.put(newKey, entry.getValue());
-                    newKey++;
-                }
+    public boolean checkIfTitleIsInUse(String title){
+        for(Integer key: jobs.keySet()){
+            Job job = jobs.get(key);
+            if(job.getTitle().equalsIgnoreCase(title)){
+                return true;
             }
+        }
+        return false;
+    }
+    public void listJobs(){
+        System.out.println("----- LISTA DE OFERTAS DE EMPREGO -----");
+        if(jobs.isEmpty()){
+            System.out.println("Não existem ofertas de emprego registadas!");
+            return;
+        }
 
-            jobs = updatedJobs;
-            System.out.println("Oferta de Emprego removida com sucesso!");
+        for(Integer key: jobs.keySet()) {
+            Job job = jobs.get(key);
+            System.out.println("Id: " + key + "\nTítulo: " + job.getTitle() + "\nCategoria: " + job.getCategory() + "\nDescrição: " + job.getDescription() + "\nHoras totais: " + job.getTotalHours());
+            if (job.getSkills().isEmpty()) {
+                System.out.println("Skills necessárias: Nenhuma");
+            } else {
+                String skillsString = String.join(" ", job.getSkills());
+                System.out.print("Skills necessárias: " + skillsString);
+            }
+            System.out.println("\n-------------------------------");
         }
     }
 
-    public ArrayList<String> getClients(){
-        return clients;
+
+    public void deleteJob(Scanner scan){
+        if(jobs.isEmpty()){
+            System.out.println("Não existem ofertas de emprego registadas!");
+            return;
+        }
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende remover:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        jobs.remove(id,jobs.get(id));
+
+        updateJobsMapKeys();
+        System.out.println("Trabalho removido com sucesso do repositório!");
     }
+
+    public boolean checkIfJobExists(int id){
+        return jobs.containsValue(jobs.get(id));
+    }
+    public void updateJobsMapKeys(){
+        // Criar um mapa novo para resetar as keys
+        Map<Integer, Job> newJobs= new HashMap<>();
+        int jobId = 0;
+        for (Job job : jobs.values()) {
+            newJobs.put(jobId,job);
+            jobId++;
+        }
+        jobs = newJobs;
+    }
+
+    public ArrayList<Talent> filterTalentsForJob(ArrayList<String> skills){
+            if(talents.isEmpty()){
+                return null;
+            }
+            ArrayList<Talent> matchingTalents = new ArrayList<>();
+            for (Talent talent : talents.values()) {
+                if(hasMatchingSkills(talent, skills)) {
+                    matchingTalents.add(talent);
+                }
+            }
+
+            // Se só encontrar um talento não faz a ordenação
+            if(matchingTalents.size() == 1){
+                return matchingTalents;
+            }
+            // Ordena os talentos encontrados por ordem alfabética
+            matchingTalents.sort((t1, t2) -> Double.compare(t2.getPricePerHour(), t1.getPricePerHour()));
+            return matchingTalents;
+    }
+
+    public void editTitle(Scanner scan){
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende editar o título:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        System.out.println("Insira o título novo:");
+        String title1st = scan.next();
+        String title2nd = scan.nextLine();
+
+        String title = String.join(title1st,"\t",title2nd);
+        while(checkIfTitleIsInUse(title)){
+            System.out.println("Já existe um trabalho com esse título! Insira outro!");
+            title1st = scan.next();
+            title2nd = scan.nextLine();
+            title = String.join(title1st,"\t",title2nd);
+        }
+
+        if(title.equals(jobs.get(id).getTitle())) {
+            while(title.equalsIgnoreCase(jobs.get(id).getTitle())) {
+                System.out.println("Esse título é o atual! Insira outro!");
+                title1st = scan.next();
+                title2nd = scan.nextLine();
+                title = String.join(title1st,"\t",title2nd);
+            }
+        }
+        jobs.get(id).setTitle(title);
+        System.out.println("Título atualizado com sucesso!");
+
+    }
+
+    public void editCategory(Scanner scan){
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende editar a categoria:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        System.out.println("Insira a categoria nova:");
+        String category1st = scan.next();
+        String category2nd = scan.nextLine();
+
+        String category = String.join(category1st,"\t",category2nd);
+
+        if(category.equals(jobs.get(id).getCategory())) {
+            while(category.equalsIgnoreCase(jobs.get(id).getCategory())) {
+                System.out.println("Essa categoria é a atual! Insira outra!");
+                category1st = scan.next();
+                category2nd = scan.nextLine();
+                category = String.join(category1st,"\t",category2nd);
+            }
+        }
+
+        jobs.get(id).setCategory(category);
+        System.out.println("Categoria atualizada com sucesso!");
+    }
+
+    public void editDescription(Scanner scan){
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende editar a descrição:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        System.out.println("Insira a descrição nova: ");
+        String desc1st = scan.next();
+        String desc2nd = scan.nextLine();
+
+        String description = String.join(desc1st,"\t",desc2nd);
+
+        if(description.equals(jobs.get(id).getDescription())) {
+            while(description.equalsIgnoreCase(jobs.get(id).getDescription())) {
+                System.out.println("Esse descrição é a atual! Insira outra!");
+                desc1st = scan.next();
+                desc2nd = scan.nextLine();
+                description = String.join(desc1st,"\t",desc2nd);
+            }
+        }
+
+        jobs.get(id).setDescription(description);
+        System.out.println("Descrição atualizada com sucesso!");
+    }
+
+    public void editTotalHours(Scanner scan){
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende editar o total de horas:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+        System.out.println("Insira o número total de horas do trabalho: ");
+        double totalHours;
+        while (true) {
+            try {
+                totalHours = scan.nextDouble();
+                if (totalHours < 0) {
+                    System.out.println("Insira um valor superior a 0!");
+                    scan.next();
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido! Insira novamente o número total de horas:");
+                scan.next();
+            }
+        }
+
+        if(totalHours == jobs.get(id).getTotalHours()){
+            while(totalHours == jobs.get(id).getTotalHours()){
+                try {
+                    System.out.println("Esse é o número de horas total atual! Insira outro!");
+                    totalHours = scan.nextDouble();
+                    if (totalHours < 0) {
+                        System.out.println("Insira um valor superior a 0!");
+                    } else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira novamente o número total de horas:");
+                    scan.next();
+                }
+            }
+        }
+
+        jobs.get(id).setTotalHours(totalHours);
+        System.out.println("Número total de horas atualizado com sucesso!");
+    }
+
+    public void editRequiredSkills(Scanner scan){
+        listJobs();
+        System.out.println("Insira o id do trabalho que pretende editar as skills necessárias:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfJobExists(id)) {
+                        System.out.println("Insira um id válido!");
+                    }
+                    else {
+                        break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        ArrayList<String> currentSkills = jobs.get(id).getSkills();
+
+        System.out.println("Insira as novas skills para este trabalho!\n> Insira numa só linha separado por virgulas. Exemplo: JAVA,PHP,etc.");
+        while(true){
+            String skillsString;
+            String[] skills = null;
+            try{
+                skillsString = scan.next();
+                skills = skillsString.split(",");
+            }catch(Exception e){
+                System.out.println("Ocorreu um erro! Insira os filtros denovo!");
+                scan.next();
+            }
+
+            ArrayList<String> requiredSkills = new ArrayList<>(Arrays.asList(skills));
+
+            if(!currentSkills.containsAll(requiredSkills)){
+                jobs.get(id).setSkills(requiredSkills);
+                break;
+            }
+            System.out.println("Essas skills necessárias são as atuais do trabalho! Insira outras!\n> Insira numa só linha separado por virgulas. Exemplo: JAVA,PHP,etc.");
+        }
+
+        System.out.println("Skills atualizadas com sucesso!");
+    }
+
 
     /**
      * Método utilizado para adicionar um novo cliente ao repositório
-     * @param client
+     * @param scan
      */
-    public void addClient(String client){
-        clients.add(client);
+    public void addClient(Scanner scan){
+        System.out.println("----- ADICIONAR CLIENTES -----");
+        System.out.println("Insira o nome do cliente que pretende adicionar!");
+        String name1st = scan.next();
+        String name2nd = scan.nextLine();
+
+        String name = String.join(name1st,"\t",name2nd);
+
+        while(checkIfClientNameIsInUse(name)){
+            System.out.println("Cliente já registado com esse nome! Tente outro!");
+            name1st = scan.next();
+            name2nd = scan.nextLine();
+
+            name = String.join(name1st,"\t",name2nd);
+        }
+        clients.add(name);
+
+        System.out.println("Cliente adicionado com sucesso!");
+    }
+
+    public boolean checkIfClientNameIsInUse(String name){
+        for(String _client: clients){
+            if(_client.equalsIgnoreCase(name)){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void listClients(){
+        System.out.println("----- LISTA DE CLIENTES -----");
+        if(clients.isEmpty()){
+            System.out.println("Não existem clientes registados!");
+            return;
+        }
+        int i = 0;
+        for (String client : clients) {
+            System.out.println("Id: " + i + "\tNome:" + client);
+            i++;
+        }
     }
 
     /**
      * Método utilizado para remover um cliente do repositório
-     * @param client
+     * @param scan
      */
-    public void removeClient(String client){
-        for(String _client: clients){
-            if(_client.equals(client)){
-                clients.remove(_client);
-                System.out.println("Cliente removido com sucesso!");
-                break;
+    public void removeClient(Scanner scan) {
+        System.out.println("----- REMOVER CLIENTES -----");
+        if (clients.isEmpty()) {
+            System.out.println("Não existem clientes registados!");
+            return;
+        }
+
+        int i = 0;
+        for (String client : clients) {
+            System.out.println("Id: " + i + "\tNome: " + client);
+            i++;
+        }
+
+        System.out.println("Insira o id do cliente que pretende remover!");
+
+        int id;
+        while (true) {
+            try {
+                id = scan.nextInt();
+                if (id < 0 || id >= clients.size()) {
+                    System.out.println("Insira um id válido!");
+                } else {
+                    break;
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
             }
         }
-        System.out.println("Cliente não encontrado!");
+
+        clients.remove(id);
+        System.out.println("Cliente removido com sucesso!");
+
     }
 
     /**
@@ -146,17 +583,29 @@ public class Repository {
             return matchingTalents;
         }
         // Ordena os talentos encontrados por ordem alfabética
-//        matchingTalents.sort(Comparator.comparing(Talent::getName));
-        Collections.sort(matchingTalents, new Comparator<Talent>() {
-            @Override
-            public int compare(Talent t1, Talent t2) {
-                return t1.getName().compareTo(t2.getName());
-            }
-        });
+        matchingTalents.sort((t1, t2) -> t1.getName().compareTo(t2.getName()));
         return matchingTalents;
     }
 
     private boolean hasMatchingSkills(Talent talent, String[] skills) {
+        boolean hasAllSkills = true;
+        for (String skill : skills) {
+            boolean found = false;
+            for (Skill _skill : talent.getSkills()) {
+                String field = _skill.getField().replace("\t", "");
+                if (field.equalsIgnoreCase(skill)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                hasAllSkills = false;
+                break;
+            }
+        }
+        return hasAllSkills;
+    }
+    private boolean hasMatchingSkills(Talent talent, ArrayList<String> skills) {
         boolean hasAllSkills = true;
         for (String skill : skills) {
             boolean found = false;
@@ -348,6 +797,7 @@ public class Repository {
 
 
     public void addNewSkill(Scanner scan){
+        System.out.println("------ ADICIONAR SKILL -----");
         System.out.println("Nome da skill:");
         String name1st = scan.next();
         String name2nd = scan.nextLine();
@@ -394,7 +844,6 @@ public class Repository {
                     id = scan.nextInt();
                     if (id < 0 || !checkIfSkillExists(id)) {
                         System.out.println("Insira um id válido!");
-                        scan.next();
                     }
                     else {
                         break;
@@ -438,7 +887,6 @@ public class Repository {
                     id = scan.nextInt();
                     if (id < 0 || !checkIfSkillExists(id)) {
                         System.out.println("Insira um id válido!");
-                        scan.next();
                     } else {
                         break;
                     }
@@ -490,6 +938,89 @@ public class Repository {
         }
         return false;
     }
+
+    public void getMediumMonthlyWageBySkill(String skill){
+        int monthlyHours = 176;
+        double monthlyCost = 0;
+
+        ArrayList<Talent> filteredTalents = filterTalentsBySkill(skill);
+
+        System.out.println("Filtro usado: " + skill);
+
+        if(filteredTalents.isEmpty()){
+            System.out.println("Não existem dados para essa skill!");
+            return;
+        }
+
+        int id = 0;
+        for(Talent talent: filteredTalents){
+            double value = talent.getPricePerHour() * monthlyHours;
+            double roundedValue = Math.round(value * 100.0) / 100.0;
+            System.out.println("Id: " + id + "\tNome: " + talent.getName() + "\tCusto por mês: " + roundedValue);
+            monthlyCost += (talent.getPricePerHour()*monthlyHours);
+            id++;
+        }
+
+        double totalValue = monthlyCost;
+        double roundedTotalValue = Math.round(totalValue * 100.0) / 100.0;
+        System.out.println("Custo total por mês: " + roundedTotalValue);
+    }
+
+    public ArrayList<Talent> filterTalentsBySkill(String skill){
+        if(talents.isEmpty()){
+            return null;
+        }
+        ArrayList<Talent> matchingTalents = new ArrayList<>();
+        for (Talent talent : talents.values()) {
+            if (talent.getSkills().stream().anyMatch(_skill -> _skill.getField().equals(skill))) {
+                matchingTalents.add(talent);
+            }
+        }
+
+        return matchingTalents;
+    }
+
+    public void getMediumMonthlyWageByCountry(String country){
+        int monthlyHours = 176;
+        double monthlyCost = 0;
+
+        ArrayList<Talent> filteredTalents = filterTalentsByCountry(country);
+
+        System.out.println("Filtro usado: " + country);
+
+        if(filteredTalents.isEmpty()){
+            System.out.println("Não existem dados para esse país!");
+            return;
+        }
+
+        int id = 0;
+        for(Talent talent: filteredTalents){
+            double value = talent.getPricePerHour() * monthlyHours;
+            double roundedValue = Math.round(value * 100.0) / 100.0;
+            System.out.println("Id: " + id + "\tNome: " + talent.getName() + "\tCusto por mês: " + roundedValue);
+            monthlyCost += (talent.getPricePerHour()*monthlyHours);
+            id++;
+        }
+
+        double totalValue = monthlyCost;
+        double roundedTotalValue = Math.round(totalValue * 100.0) / 100.0;
+        System.out.println("Custo total por mês: " + roundedTotalValue);
+    }
+
+    public ArrayList<Talent> filterTalentsByCountry(String country){
+        if(talents.isEmpty()){
+            return null;
+        }
+        ArrayList<Talent> matchingTalents = new ArrayList<>();
+        for (Talent talent : talents.values()) {
+            if(talent.getCountry().equalsIgnoreCase(country)){
+                matchingTalents.add(talent);
+            }
+        }
+
+        return matchingTalents;
+    }
+
 
     public void manageExperiences(Scanner scan,Talent talent){
         System.out.println("----- MANAGE EXPERIENCES -----\n1 - Apagar Experiência\n2 - Adicionar Experiência\n3 - Editar título de uma experiência\n4 - Editar data de fim de uma experiência");

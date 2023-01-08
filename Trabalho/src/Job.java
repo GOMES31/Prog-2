@@ -3,11 +3,11 @@ import java.util.ArrayList;
 public class Job {
     private String title;
     private String category;
-    private ArrayList<Skill> skills;
+    private ArrayList<String> skills;
     private String description;
-    private int totalHours = 0;
+    private double totalHours = 0;
 
-    public Job(String title, String category,ArrayList<Skill> skills,String description,int totalHours){
+    public Job(String title, String category,ArrayList<String> skills,String description,double totalHours){
         this.title = title;
         this.category = category;
         this.skills = skills;
@@ -31,11 +31,11 @@ public class Job {
         this.category = category;
     }
 
-    public ArrayList<Skill> getSkills() {
+    public ArrayList<String> getSkills() {
         return skills;
     }
 
-    public void setSkills(ArrayList<Skill> skills) {
+    public void setSkills(ArrayList<String> skills) {
         this.skills = skills;
     }
 
@@ -47,11 +47,11 @@ public class Job {
         this.description = description;
     }
 
-    public int getTotalHours() {
+    public double getTotalHours() {
         return totalHours;
     }
 
-    public void setTotalHours(int totalHours) {
+    public void setTotalHours(double totalHours) {
         this.totalHours = totalHours;
     }
 }
