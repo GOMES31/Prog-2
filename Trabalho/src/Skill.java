@@ -11,13 +11,18 @@ public class Skill {
         this.field = field;
         this.expYears = expYears;
     }
+
+    public Skill(String name,String field){
+        this.name = name;
+        this.field = field;
+        this.id = currentId++;
+    }
     public String getName() {
         return name;
     }
 
     public void setName(String name) {
         this.name = name;
-        System.out.println("Nome atualizado com sucesso!");
     }
 
     public void setId(int id){
@@ -39,4 +44,5 @@ public class Skill {
         this.expYears = expYears;
         System.out.println("Anos de experiência atualizados com sucesso!");
     }
+
 }

@@ -20,7 +20,7 @@ public class Platform {
         repository = new Repository();
         startMenu = new String[4];
         initialMenu = new String[5];
-        talentMenu = new String[6];
+        talentMenu = new String[7];
         skillsMenu = new String[7];
         jobsMenu = new String[7];
     }
@@ -54,8 +54,9 @@ public class Platform {
         talentMenu[1] = "1 - Listar Perfil de Talento";
         talentMenu[2] = "2 - Adicionar Perfil de Talento";
         talentMenu[3] = "3 - Editar Perfil de Talento";
-        talentMenu[4] = "4 - VOLTAR A TRÁS!";
-        talentMenu[5] = "0 - [SAIR]";
+        talentMenu[4] = "4 - Procurar talentos";
+        talentMenu[5] = "5 - VOLTAR A TRÁS!";
+        talentMenu[6] = "0 - [SAIR]";
     }
 
     /**
@@ -78,9 +79,9 @@ public class Platform {
         skillsMenu[0] = "----- MENU SKILLS -----";
         skillsMenu[1] = "1 - Listar Skills";
         skillsMenu[2] = "2 - Adicionar Skill";
-        skillsMenu[3] = "3 - Editar Skill";
-        skillsMenu[4] = "4 - Eliminar Skill";
-        skillsMenu[5] = " 5 - VOLTAR A TRÁS!";
+        skillsMenu[3] = "3 - Eliminar Skill";
+        skillsMenu[4] = "4 - Editar Skill";
+        skillsMenu[5] = "5 - VOLTAR A TRÁS!";
         skillsMenu[6] = "0 - [SAIR]";
     }
 
@@ -99,7 +100,6 @@ public class Platform {
         defineStartMenu();
         System.out.println(String.join("\n", startMenu) + "\nEscolha uma opção!");
         int option;
-        try {
             while(true){
                 try {
                     option = scan.nextInt();
@@ -125,10 +125,6 @@ public class Platform {
                     break;
             }
 
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -140,6 +136,7 @@ public class Platform {
         if (!file.exists()) {
             try {
                 file.createNewFile();
+                saveUserToCsvFile(new User("admin","admin", Type.ADMIN));
                 return false;
             } catch (IOException e) {
                 System.out.println("Error creating file: " + e.getMessage());
@@ -206,7 +203,6 @@ public class Platform {
         defineInitialMenu();
         System.out.println(String.join("\n", initialMenu) + "\nEscolha uma opção!");
         int option;
-        try {
             while(true){
                 try {
                     option = scan.nextInt();
@@ -234,10 +230,6 @@ public class Platform {
                     skillsMenu();
                     break;
             }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -247,11 +239,10 @@ public class Platform {
         defineTalentMenu();
         System.out.println(String.join("\n", talentMenu) + "\nEscolha uma opção!");
         int option;
-        try {
             while(true){
                 try {
                     option = scan.nextInt();
-                    if(option < 0 || option > 4) System.out.println("Opção Inválida!\n" + String.join("\n", talentMenu));
+                    if(option < 0 || option > 5) System.out.println("Opção Inválida!\n" + String.join("\n", talentMenu));
                     else{
                         break;
                     }
@@ -275,14 +266,14 @@ public class Platform {
                     editTalentProfile();
                     break;
                 case 4:
+                    searchTalentProfile();
+                    talentMenu();
+                    break;
+                case 5:
                     initialMenu();
                     break;
             }
 
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -291,7 +282,7 @@ public class Platform {
     public void listTalents(){
         System.out.println("----- LISTA DE TALENTOS -----");
         // Verifica se existem talentos registados no repositório
-        if(repository.getTalents().size() == 0){
+        if(repository.getTalents().isEmpty()){
             System.out.println("Não existem talentos registados!");
             talentMenu();
         }
@@ -302,12 +293,11 @@ public class Platform {
                 printTalentProfileDependingOnPrivacy(talent,key);
             }
             System.out.println("Que pretende fazer agora?\n1 - Voltar ao menu de talentos\n2 - Consultar informação detalhada de um talento");
-            try{
                 int option;
                 while(true){
                     try {
                         option = scan.nextInt();
-                        if(option < 0 || option > 2) System.out.println("Opção Inválida!\n1 - Voltar ao menu de talentos\n2 - Consultar informação detalhada de um talento");
+                        if(option < 1 || option > 2) System.out.println("Opção Inválida!\n1 - Voltar ao menu de talentos\n2 - Consultar informação detalhada de um talento");
                         else{
                             break;
                         }
@@ -321,6 +311,10 @@ public class Platform {
                         talentMenu();
                         break;
                     case 2:
+                        for(Integer key: repository.getTalents().keySet()){
+                            Talent talent = repository.getTalents().get(key);
+                            printTalentProfileDependingOnPrivacy(talent,key);
+                        }
                         System.out.println("Insira o id do talento!");
                         int id;
                         while(true){
@@ -332,7 +326,7 @@ public class Platform {
                                 }
                             }catch(InputMismatchException e){
                                 System.out.println("Insira um id válido!");
-                                scan.nextInt();
+                                scan.next();
                             }
                         }
 
@@ -340,9 +334,6 @@ public class Platform {
                         detailedInfo(id);
                         break;
                 }
-            }catch(Exception e){
-                e.printStackTrace();
-            }
         }
     }
     public boolean checkIfUserIsInTalentsMap(int id){
@@ -367,6 +358,7 @@ public class Platform {
         }
         else{
             System.out.println("\tId: " + key + "\tNome:"+ talent.getName());
+            System.out.println("-------------------------------------------------------------------------------------------------");
         }
     }
 
@@ -374,7 +366,6 @@ public class Platform {
      * Método utilizado para imprimir um sub menu de TALENTOS
      */
     public void listTalentsSubMenu(){
-        try{
             System.out.println("Este talento tem o perfil privado! Que pretende fazer?");
             System.out.println("1 - Voltar ao menu de talentos!\n2 - Ver informação detalhada de outro talento!");
             int option;
@@ -406,7 +397,7 @@ public class Platform {
                             }
                         }catch(InputMismatchException e){
                             System.out.println("Insira um id válido!");
-                            scan.nextInt();
+                            scan.next();
                         }
                     }
 
@@ -414,9 +405,6 @@ public class Platform {
                     detailedInfo(id);
                     break;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -464,7 +452,6 @@ public class Platform {
      */
     public void addTalentProfile(){
         System.out.println("----- ADICIONAR NOVO TALENTO -----");
-        try {
             System.out.println("Insira o nome:");
             String firstname = scan.next();
             String surname = scan.nextLine();
@@ -472,14 +459,17 @@ public class Platform {
             String name = String.join(firstname,"\t",surname);
 
             System.out.println("Insira o país de origem:");
-            String country = scan.next();
+            String country1st = scan.next();
+            String country2nd = scan.nextLine();
+
+            String country = String.join(country1st,"\t",country2nd);
 
             System.out.println("Insira o mail do talento:");
             String mail = scan.next();
 
             while(!repository.checkIfMailIsValid(mail)) {
-                mail = scan.next();
                 System.out.println("Mail inválido!");
+                mail = scan.next();
             }
 
             System.out.println("Insira o preço por hora que o talento cobra:");
@@ -489,6 +479,7 @@ public class Platform {
                     pricePerHour = scan.nextDouble();
                     if (pricePerHour < 0) {
                         System.out.println("Insira um valor superior a 0!");
+                        scan.next();
                     }else {
                         break;
                     }
@@ -498,12 +489,9 @@ public class Platform {
                 }
             }
 
-            Talent newTalent = new Talent(name, country, mail, pricePerHour);
+            Talent newTalent = new Talent(name, country, mail.toString(), pricePerHour);
             repository.addTalent(newTalent);
             addTalentProfileSubMenu(newTalent);
-        }catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -511,7 +499,6 @@ public class Platform {
      * @param talent
      */
     public void addTalentProfileSubMenu(Talent talent){
-        try{
             System.out.println("Que pretende fazer agora?");
             System.out.println("\n1 - Adicionar uma skill ao talento\n2 - Adicionar uma experiência ao talento\n3 - Voltar ao menu de talentos\n0 - [SAIR]");
             int option;
@@ -533,136 +520,17 @@ public class Platform {
                     scan.close();
                     break;
                 case 1:
-                    addSkill(talent);
+                    talent.addNewSkill(scan);
+                    addTalentProfileSubMenu(talent);
                     break;
                 case 2:
-                    addExperience(talent);
+                    talent.addNewExperience(scan);
+                    addTalentProfileSubMenu(talent);
                     break;
                 case 3:
                     talentMenu();
                     break;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * Método utilizado para adicionar uma experiência a um talento
-     * @param talent
-     */
-    public void addExperience(Talent talent){
-        // Inicializa um DateTimeFormatter para depois formatar um LocalDate em "dd/MM/yyyy"
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        try{
-            System.out.println("Insira o título da experiência:");
-            String title1 = scan.next();
-            String title2 = scan.nextLine();
-
-            String title = String.join(title1,"\t",title2);
-
-            System.out.println("Insira a empresa da experiência:");
-            String enterprise = scan.next();
-
-
-                System.out.println("Insira a data de início da experiência:");
-                String startDateInput = scan.next();
-
-                LocalDate startDate;
-                while(true){
-                    try{
-                        startDate = LocalDate.parse(startDateInput,dateFormatter);
-                        break;
-                    }catch(DateTimeParseException e){
-                        System.out.println("Data de início inválida! Por favor, insira uma data no formato dd/MM/yyyy.");
-                        startDateInput = scan.next();
-                    }
-                }
-
-                System.out.println("Insira a data de fim da experiência:");
-                String endDateInput = scan.next();
-
-                LocalDate endDate;
-
-                while(true){
-                    try{
-                        endDate = LocalDate.parse(endDateInput,dateFormatter);
-                        break;
-                    }catch(DateTimeParseException e){
-                        System.out.println("Data de fim inválida! Por favor, insira uma data no formato dd/MM/yyyy.");
-                        endDateInput = scan.next();
-                    }
-                }
-
-                if(endDate.isAfter(startDate)){
-                    Experience newExperience = new Experience(title,enterprise,startDate,endDate);
-                    talent.addExperience(newExperience);
-                    addTalentProfileSubMenu(talent);
-                }
-                else{
-                    System.out.println("A data de fim da experiência deve ser posterior à data de início!");
-                    while(!endDate.isAfter(startDate)){
-                        System.out.println("Insira a data de início da experiência:");
-                        startDateInput = scan.next();
-
-                        System.out.println("Insira a data de fim da experiência:");
-                        endDateInput = scan.next();
-
-                        startDate = LocalDate.parse(startDateInput,dateFormatter);
-                        endDate = LocalDate.parse(endDateInput,dateFormatter);
-
-                        if(!endDate.isAfter(startDate)) System.out.println("Data Inválida: Tente novamente!");
-                    }
-                    Experience newExperience = new Experience(title,enterprise,startDate,endDate);
-                    talent.addExperience(newExperience);
-                    addTalentProfileSubMenu(talent);
-                }
-
-        }catch(Exception e){
-            System.out.println("Input inválido!");
-        }
-    }
-
-    /**
-     * Método utilizado para adicionar uma nova Skill a um talento
-     * @param talent
-     */
-    public void addSkill(Talent talent){
-        try{
-            System.out.println("Nome da skill:");
-            String name = scan.next();
-
-            System.out.println("Área da skill:");
-            String field = scan.next();
-
-            System.out.println("Número de anos de experiência com essa skill:");
-            double expYears;
-            while (true) {
-                try {
-                    expYears = scan.nextDouble();
-                    if (expYears < 0) {
-                        System.out.println("Insira um valor superior a 0!");
-                    }else {
-                        break;
-                    }
-                } catch (InputMismatchException e) {
-                    System.out.println("Input inválido!");
-                    scan.nextDouble();
-
-                }
-            }
-
-            try{
-                Skill newSkill = new Skill(name,field,expYears);
-                talent.addSkill(newSkill);
-                addTalentProfileSubMenu(talent);
-
-            }catch(Exception e){
-                e.printStackTrace();
-            }
-        }catch(Exception e){
-            System.out.println("Input inválido!");
-        }
     }
 
     /**
@@ -678,8 +546,8 @@ public class Platform {
             System.out.println("----- LISTA DE PERFIS -----");
             for(Integer key: repository.getTalents().keySet()){
                 Talent talent = repository.getTalents().get(key);
-                System.out.println("\tId: " + key + "\tNome: " + talent.getName() + ",\tEmail: " + talent.getMail() + ",\tPaís: "
-                        + talent.getCountry() + ",\tPreço por hora: " + talent.getPricePerHour());
+                System.out.println("\tId: " + key + "\tNome: " + talent.getName() + "\tEmail: " + talent.getMail() + "\tPaís: "
+                        + talent.getCountry() + "\tPreço por hora: " + talent.getPricePerHour());
                 System.out.println("----------------------");
             }
             System.out.println("Insira o id do perfil que pretende editar:");
@@ -704,7 +572,21 @@ public class Platform {
     public void editTalentProfileSubMenu(int id) {
 
             // Verifica se existem talentos registados com o id passado como parâmetro
-            if (repository.getTalents().get(id) == null) {
+            if(id < 0){
+                System.out.println("Insira um id superior a 0!");
+                int newId;
+                while(true){
+                    try{
+                        newId = scan.nextInt();
+                        break;
+                    }catch(InputMismatchException e){
+                        System.out.println("Input inválido!");
+                        scan.next();
+                    }
+                }
+                editTalentProfileSubMenu(newId);
+            }
+            else if(repository.getTalents().get(id) == null) {
                 System.out.println("Não existem talentos com esse id!");
                 talentMenu();
             }
@@ -735,7 +617,7 @@ public class Platform {
                         talentMenu();
                         break;
                     case 2:
-                        repository.editTalent(id, scan);
+                        repository.editTalent(id,scan);
                         talentMenu();
                         break;
                     case 3:
@@ -749,6 +631,48 @@ public class Platform {
 
     }
 
+    public void searchTalentProfile(){
+        System.out.println("----- PROCURAR TALENTOS -----");
+        if(repository.getTalents().isEmpty()){
+            System.out.println("Não existem talentos registados!");
+            return;
+        }
+        System.out.println("Insira uma combinação de skills que quer que o talento tenha!\n> Insira numa só linha separado por virgulas. Exemplo: JAVA,PHP,etc.");
+        String skillsString;
+        String[] skills=null;
+        try{
+            skillsString = scan.next();
+            skills = skillsString.split(",");
+        }catch(Exception e){
+            System.out.println("Ocorreu um erro! Insira os filtros denovo!");
+            scan.next();
+        }
+
+        StringBuilder filters= new StringBuilder();
+        if(skills!=null){
+            for(String skill: skills){
+                filters.append(skill).append("\t");
+            }
+        }
+
+        System.out.println("----- RESULTADO -----");
+        System.out.println("Filtros: " + filters.toString().toLowerCase());
+        ArrayList<Talent> matchingTalents = repository.searchTalent(skills);
+        if (matchingTalents == null) {
+            System.out.println("Não existem talentos registados!");
+            return;
+        }
+
+        if (matchingTalents.isEmpty()) {
+            System.out.println("Nenhum talento encontrado com esse combo de skills!");
+            return;
+        }
+
+        // Imprime os talentos por ordem alfabética
+        for (Talent talent : matchingTalents) {
+            System.out.println("Nome: " + talent.getName()+ "\tPreço por hora: " + talent.getPricePerHour() + "\tPaís: " + talent.getCountry());
+        }
+    }
 
 
     /**
@@ -757,7 +681,6 @@ public class Platform {
     public void jobsMenu(){
         defineJobsMenu();
         System.out.println(String.join("\n", jobsMenu) + "\nEscolha uma opção!");
-        try {
             int option;
             while(true){
                 try {
@@ -789,14 +712,10 @@ public class Platform {
 //    TODO -                editJob();
                     break;
                 case 5:
-                    treatStartMenu();
+                    initialMenu();
                     break;
             }
 
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -805,7 +724,6 @@ public class Platform {
     public void skillsMenu(){
         defineSkillsMenu();
         System.out.println(String.join("\n", skillsMenu) + "\nEscolha uma opção!");
-        try {
             int option;
             while(true){
                 try {
@@ -825,26 +743,25 @@ public class Platform {
                     scan.close();
                     break;
                 case 1:
-//    TODO -                listSkills();
+                    repository.listSkills();
+                    skillsMenu();
                     break;
                 case 2:
-//    TODO -                addSkill();
+                    repository.addNewSkill(scan);
+                    skillsMenu();
                     break;
                 case 3:
-//    TODO -                deleteSkill();
+                    repository.deleteSkill(scan);
+                    skillsMenu();
                     break;
                 case 4:
-//    TODO -                editSkill();
+                    repository.editSkillName(scan);
+                    skillsMenu();
                     break;
                 case 5:
-                    treatStartMenu();
+                    initialMenu();
                     break;
             }
-
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     /**
@@ -860,7 +777,7 @@ public class Platform {
                 // Divide uma linha do ficheiro users.csv a partir da vírgula
                 String[] parts = line.split(",");
                 // parts[0] -> username , parts[1] -> password , parts[2] -> tipo de utilizador
-                if(parts[0].equals(username)) return true;
+                if(parts[0].equalsIgnoreCase(username)) return true;
             }
             reader.close();
             return false;
@@ -885,7 +802,7 @@ public class Platform {
                 // Divide uma linha do ficheiro users.csv a partir da vírgula
                 String[] parts = line.split(",");
                 // parts[0] -> username , parts[1] -> password , parts[2] -> tipo de utilizador
-                if(parts[0].equals(username)) {
+                if(parts[0].equalsIgnoreCase(username)) {
                     savedPassword = parts[1];
                     break;
                 }

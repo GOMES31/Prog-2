@@ -23,6 +23,9 @@ public class Experience {
         return id;
     }
 
+    public void setId(int id){
+        this.id = id;
+    }
     public String getTitle() {
         return title;
     }
@@ -33,10 +36,6 @@ public class Experience {
 
     public String getEnterprise() {
         return enterprise;
-    }
-
-    public void setEnterprise(String enterprise) {
-        this.enterprise = enterprise;
     }
 
     public LocalDate getStartDate() {

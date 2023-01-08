@@ -4,13 +4,13 @@ import java.util.regex.Pattern;
 
 public class Repository {
     private Map<Integer,Talent> talents;
-    private Map<Integer,Skill> skills;
+    private static Map<Integer,Skill> skills;
     private Map<Integer,Job> jobs;
 
     private ArrayList<String> clients;
 
     private int talentsKey = 0;
-    private int skillsKey = 0;
+    private static int skillsKey = 0;
     private int jobsKey = 0;
 
     public Repository(){
@@ -130,6 +130,50 @@ public class Repository {
         }
     }
 
+    public ArrayList<Talent> searchTalent(String[] skills) {
+        if(talents.isEmpty()){
+            return null;
+        }
+        ArrayList<Talent> matchingTalents = new ArrayList<>();
+        for (Talent talent : talents.values()) {
+            if(hasMatchingSkills(talent, skills)) {
+                matchingTalents.add(talent);
+            }
+        }
+
+        // Se só encontrar um talento não faz a ordenação
+        if(matchingTalents.size() == 1){
+            return matchingTalents;
+        }
+        // Ordena os talentos encontrados por ordem alfabética
+//        matchingTalents.sort(Comparator.comparing(Talent::getName));
+        Collections.sort(matchingTalents, new Comparator<Talent>() {
+            @Override
+            public int compare(Talent t1, Talent t2) {
+                return t1.getName().compareTo(t2.getName());
+            }
+        });
+        return matchingTalents;
+    }
+
+    private boolean hasMatchingSkills(Talent talent, String[] skills) {
+        boolean hasAllSkills = true;
+        for (String skill : skills) {
+            boolean found = false;
+            for (Skill _skill : talent.getSkills()) {
+                String field = _skill.getField().replace("\t", "");
+                if (field.equalsIgnoreCase(skill)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                hasAllSkills = false;
+                break;
+            }
+        }
+        return hasAllSkills;
+    }
     /**
      * Método utilizado para editar informações de um talento
      * @param key
@@ -139,12 +183,11 @@ public class Repository {
         Talent talent = talents.get(key);
         System.out.println("O que pretende editar neste talento?");
         System.out.println("1 - Alterar email\n2 - Alterar preço por hora\n3 - Alterar privacidade\n4 - Gerir Skills\n5 - Gerir Experiências");
-        try{
             int option;
             while(true){
                 try {
                     option = scan.nextInt();
-                    if(option < 1 || option > 6) System.out.println("Opção Inválida!\n1 - Alterar email\n2 - Alterar preço por hora\n3 - Alterar privacidade\n4 - Gerir Skills\n5 - Gerir Experiências");
+                    if(option < 1 || option > 5) System.out.println("Opção Inválida!\n1 - Alterar email\n2 - Alterar preço por hora\n3 - Alterar privacidade\n4 - Gerir Skills\n5 - Gerir Experiências");
                     else{
                         break;
                     }
@@ -167,16 +210,14 @@ public class Repository {
                     manageSkills(scan,talent);
                     break;
                 case 5:
-                    // TODO - MANAGE EXPERIENCES
+                    manageExperiences(scan,talent);
                     break;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
     }
     public boolean checkIfMailIsValid(String mail){
         for(Talent _talent: talents.values()){
-            if(_talent.getMail().equals(mail)){
+            if(_talent.getMail().equalsIgnoreCase(mail)){
+                System.out.println("O mail já se encontra em uso!");
                 return false;
             }
         }
@@ -187,13 +228,12 @@ public class Repository {
     }
 
     public void manageSkills(Scanner scan, Talent talent){
-        System.out.println("----- MANAGE SKILLS -----\n1 - Apagar Skill\n2 - Adicionar Skill\n3 - Editar nome de uma skill\n4 - Editar anos de experiência de uma skill!");
-        try{
+        System.out.println("----- MANAGE SKILLS -----\n1 - Apagar Skill\n2 - Adicionar Skill\n3 - Editar nome de uma skill\n4 - Editar anos de experiência de uma skill");
             int option;
             while(true){
                 try {
                     option = scan.nextInt();
-                    if(option < 1 || option > 4) System.out.println("Opção Inválida!\n1 - Apagar Skill\n2 - Adicionar Skill\n3 - Editar nome de uma skill\n4 - Editar anos de experiência de uma skill!");
+                    if(option < 1 || option > 4) System.out.println("Opção Inválida!\n1 - Apagar Skill\n2 - Adicionar Skill\n3 - Editar nome de uma skill\n4 - Editar anos de experiência de uma skill");
                     else{
                         break;
                     }
@@ -205,148 +245,281 @@ public class Repository {
             switch(option){
                 case 1:
                     talent.removeSkill(scan);
-                    updateSkillsRepository("remove",talent.removeSkill(scan));
                     break;
                 case 2:
                     talent.addNewSkill(scan);
-                    updateSkillsRepository("add",talent.addNewSkill(scan));
                     break;
                 case 3:
                     talent.editSkillName(scan);
-                    updateSkillsRepository("editName",talent.editSkillName(scan));
                     break;
                 case 4:
                     talent.editSkillExpYears(scan);
-                    updateSkillsRepository("editYears",talent.editSkillExpYears(scan));
                     break;
             }
-        }catch(Exception e){
-            System.out.println("Input inválido! Insira um número!");
-        }
     }
 
-    public int getSkillMapKey(Skill skill){
-        int key = -1;
-        for(Map.Entry<Integer,Skill> entry : skills.entrySet()){
-            if(entry.getValue().equals(skill)){
-                key = entry.getKey();
-                return key;
-            }
-        }
-        return key;
-    }
-    public void removeSkill(Skill skill){
-        int key = -1;
-        try{
-            if(skill == null){
-                System.out.println("Nenhuma skill removida pois o parâmetro passado foi nulo!");
-            }
-            else if(skills.containsValue(skill)) {
 
-                key = getSkillMapKey(skill);
-                Map<Integer, Skill> updatedSkills = new HashMap<>();
-                int newKey = 0;
-                for (Map.Entry<Integer,Skill> entry : skills.entrySet()) {
-                    if (entry.getKey() != key) {
-                        entry.getValue().setId(newKey);
-                        updatedSkills.put(newKey, entry.getValue());
-                        newKey++;
-                    }
-                }
-                skills = updatedSkills;
+    public void listSkills(){
+        if(skills.isEmpty()){
+            System.out.println("Não existem skills registadas no repositório");
+            return;
+        }
+        System.out.println("----- LISTA DE SKILLS NO REPOSITÓRIO -----");
+            for (Integer key : skills.keySet()) {
+                Skill skill = skills.get(key);
+                System.out.println("Id: " + key + "\tNome: " + skill.getName() + "\tÁrea: " + skill.getField());
+            }
+    }
+    public static void removeSkill(String name){
+        for (Skill skill : skills.values()) {
+            if(skill.getName().equalsIgnoreCase(name)) {
+                // Obter a chave para o objeto atual
+                Integer key = getKeyByValue(skills, skill);
+                // Remover a skill do mapa usando a key
+                skills.remove(key);
+                updateSkillMapKeys();
                 System.out.println("Skill removida com sucesso!");
+                return;
             }
-            else{
-                System.out.println("Skill não existe no repositório principal!");
-            }
-        }catch(Exception e){
-            e.printStackTrace();
         }
+        System.out.println("Skill não existe no repositório!");
+    }
+
+    public static void updateSkillMapKeys(){
+        // Criar um mapa novo para resetar as keys
+        Map<Integer, Skill> newSkills = new HashMap<>();
+        int skillId = 0;
+        for (Skill skill : skills.values()) {
+            skill.setId(skillId);
+            newSkills.put(skillId, skill);
+            skillId++;
+        }
+        skills = newSkills;
+    }
+
+    /**
+     * Método para obter a chave de um elemento num mapa
+     * @param map
+     * @param value
+     * @return
+     * @param <T>
+     * @param <E>
+     */
+    private static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Map.Entry<T, E> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 
     /**
      * Método utilizado para adicionar uma skill ao repositório
      * @param skill
      */
-    public void addSkill(Skill skill){
-        try{
-            if(skill == null){
-                System.out.println("Nenhuma skill adicionada pois o parâmetro passado foi nulo!");
+    public static void addSkill(Skill skill){
+        for (Skill _skill : skills.values()) {
+            if(_skill.getName().equalsIgnoreCase(skill.getName())) {
+                System.out.println("Já existe uma skill com esse nome no repositório principal!");
+                return;
             }
-            else if(skills.containsValue(skill)){
-                System.out.println("A skill já existe no repositório principal!");
-            }
-            else{
-                skills.put(skillsKey++,skill);
-                System.out.println("Skill adicionada com sucesso ao repositório principal!");
-            }
-        }catch(Exception e){
-            e.printStackTrace();
         }
+
+        skills.put(skillsKey++,skill);
+        System.out.println("Skill adicionada com sucesso ao repositório principal!");
     }
 
-    public void editSkillName(Skill skill){
-        try{
-            if(skill == null){
-                System.out.println("Nenhuma editada pois o parâmetro passado foi nulo!");
+    public static void editSkillName(String oldName, String newName){
+        for (Skill skill : skills.values()) {
+            if(skill.getName().equalsIgnoreCase(oldName)) {
+                // Obter a chave para o objeto atual
+                Integer key = getKeyByValue(skills, skill);
+                // Atualizar o nome da skill
+                skill.setName(newName);
+                System.out.println("Skill atualizada com sucesso no repositório!");
+                return;
             }
-            else if(!skills.containsValue(skill)) {
-                System.out.println("A skill não existe no repositório principal!");
-            }
-            else{
-                for(Skill _skill: skills.values()){
-                    if(_skill.equals(skill)){
-                        _skill.setName(skill.getName());
-                        skills.replace(getSkillMapKey(skill),skill,_skill);
+        }
+        System.out.println("A skill não existe no repositório!");
+
+    }
+
+
+
+    public void addNewSkill(Scanner scan){
+        System.out.println("Nome da skill:");
+        String name1st = scan.next();
+        String name2nd = scan.nextLine();
+
+        String name = String.join(name1st,"\t",name2nd);
+        while(checkIfNameIsInUse(name)){
+            System.out.println("Já existe uma skill com esse nome. Insira outro!");
+            name1st = scan.next();
+            name2nd = scan.nextLine();
+            name = String.join(name1st,"\t",name2nd);
+        }
+
+        System.out.println("Área da skill:");
+        String field1st = scan.next();
+        String field2nd = scan.nextLine();
+
+        String field = String.join(field1st,"\t",field2nd);
+
+        skills.put(skillsKey++,new Skill(name,field));
+
+        int skillId = 0;
+        for(Skill skill: skills.values()){
+            skill.setId(skillId);
+            skillId++;
+        }
+        System.out.println("Skill adicionada com sucesso ao repositório!");
+    }
+
+    public void deleteSkill(Scanner scan){
+        if(skills.isEmpty()){
+            System.out.println("Este repositório não tem skills registadas!");
+            return;
+        }
+        System.out.println("----- LISTA DE SKILLS -----");
+        for(Integer key: skills.keySet()){
+            Skill skill = skills.get(key);
+            System.out.println("Id: " + key + "\tNome: " + skill.getName() + "\tAnos Experiência: " + skill.getExpYears());
+        }
+        System.out.println("Insira o id da skill que pretende remover:");
+        int id;
+        while (true) {
+            try {
+                try {
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfSkillExists(id)) {
+                        System.out.println("Insira um id válido!");
+                        scan.next();
+                    }
+                    else {
                         break;
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+
+        // Ve se algum talento tem aquela skill antes de remover
+        if (checkIfAnyTalentHasThisSkill(skills.get(id).getName())) {
+            System.out.println("Não pode remover essa Skill pois está associada a um talento!");
+            return;
+        }
+
+        skills.remove(id,skills.get(id));
+
+        updateSkillMapKeys();
+        System.out.println("Skill removida com sucesso do repositório!");
+    }
+
+
+
+    public void editSkillName(Scanner scan){
+        System.out.println("----- LISTA DE SKILLS -----");
+        for(Integer key: skills.keySet()){
+            Skill skill = skills.get(key);
+            System.out.println("Id: " + key + "\tNome: " + skill.getName() + "\tAnos Experiência: " + skill.getExpYears());
+        }
+        System.out.println("Insira o id da skill que pretende editar o nome:");
+
+        int id;
+        while (true) {
+            try {
+                try{
+                    id = scan.nextInt();
+                    if (id < 0 || !checkIfSkillExists(id)) {
+                        System.out.println("Insira um id válido!");
+                        scan.next();
+                    } else {
+                        break;
+                    }
+                }catch(IndexOutOfBoundsException e){
+                    System.out.println("Insira um id válido!");
+                    scan.next();
+                }
+            } catch (InputMismatchException e) {
+                System.out.println("Input inválido!");
+                scan.next();
+            }
+        }
+        System.out.println("Insira o novo nome para a skill:");
+        String name1st = scan.next();
+        String name2nd = scan.nextLine();
+
+        String name = String.join(name1st,"\t",name2nd);
+        while(checkIfNameIsInUse(name)){
+            System.out.println("Já existe uma skill com esse nome. Insira outro!");
+            name1st = scan.next();
+            name2nd = scan.nextLine();
+            name = String.join(name1st,"\t",name2nd);
+        }
+
+        skills.get(id).setName(name);
+
+    }
+
+    public boolean checkIfAnyTalentHasThisSkill(String name){
+            for(Integer key: talents.keySet()){
+                Talent talent = talents.get(key);
+                for (Skill skill : talent.getSkills()) {
+                    if (skill.getName().equalsIgnoreCase(name)) {
+                        return true;
                     }
                 }
             }
-        }catch(Exception e){
-            e.printStackTrace();
+            return false;
+    }
+    public boolean checkIfSkillExists(int id){
+        return skills.containsValue(skills.get(id));
+    }
+    public boolean checkIfNameIsInUse(String name){
+        for(Integer key: skills.keySet()){
+            Skill skill = skills.get(key);
+            if(skill.getName().equalsIgnoreCase(name)){
+                return true;
+            }
         }
+        return false;
     }
 
-    public void editSkillYears(Skill skill){
-        try{
-            if(skill == null){
-                System.out.println("Nenhuma editada pois o parâmetro passado foi nulo!");
-            }
-            else if (!skills.containsValue(skill)) {
-                System.out.println("A skill não existe no repositório principal!");
-            }
-            else{
-                for(Skill _skill: skills.values()){
-                    if(_skill.equals(skill)){
-                        _skill.setExpYears(skill.getExpYears());
-                        skills.replace(getSkillMapKey(skill),skill,_skill);
+    public void manageExperiences(Scanner scan,Talent talent){
+        System.out.println("----- MANAGE EXPERIENCES -----\n1 - Apagar Experiência\n2 - Adicionar Experiência\n3 - Editar título de uma experiência\n4 - Editar data de fim de uma experiência");
+            int option;
+            while(true){
+                try {
+                    option = scan.nextInt();
+                    if(option < 1 || option > 4) System.out.println("\n1 - Apagar Experiência\n2 - Adicionar Experiência\n3 - Editar título de uma experiência\n4 - Editar data de fim de uma experiência");
+                    else{
                         break;
                     }
+                }catch(InputMismatchException e){
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
                 }
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-    }
-    public void updateSkillsRepository(String action, Skill skill){
-        try{
-            switch(action){
-                case "remove":
-                    removeSkill(skill);
+            switch(option){
+                case 1:
+                    talent.removeExperience(scan);
                     break;
-                case "add":
-                    addSkill(skill);
+                case 2:
+                    talent.addNewExperience(scan);
                     break;
-                case "editName":
-                    editSkillName(skill);
+                case 3:
+                    talent.editExpTitle(scan);
                     break;
-                case "editYears":
-                    editSkillYears(skill);
+                case 4:
+                    talent.editExpEndDate(scan);
                     break;
             }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
     }
 
 }
