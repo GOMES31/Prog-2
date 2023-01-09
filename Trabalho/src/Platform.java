@@ -24,8 +24,8 @@ public class Platform {
         skillsMenu = new String[7];
         jobsMenu = new String[8];
         clientsMenu = new String[6];
-        adminMenu = new String[11];
-        managerMenu = new String[9];
+        adminMenu = new String[13];
+        managerMenu = new String[10];
 
     }
 
@@ -64,7 +64,9 @@ public class Platform {
         adminMenu[7] = "7 - Editar permissões";
         adminMenu[8] = "8 - Criar utilizadores";
         adminMenu[9] = "9 - Editar utilizadores";
-        adminMenu[10] = "0 - [SAIR]";
+        adminMenu[10] = "10 - Ver histórico de todos os utilizadores";
+        adminMenu[11] ="11 - Ver histórico de um utilizador específico";
+        adminMenu[12] = "0 - [SAIR]";
     }
 
     public void defineManagerMenu(){
@@ -76,7 +78,8 @@ public class Platform {
         managerMenu[5] = "5 - Obter relatório gastos mensais por país";
         managerMenu[6] = "6 - Obter relatório gastos mensais por skill";
         managerMenu[7] = "7 - Editar permissões";
-        managerMenu[8] = "0 - [SAIR]";
+        managerMenu[8] = "8 - Consultar o meu histórico";
+        managerMenu[9] = "0 - [SAIR]";
     }
     /**
      * Define o array do MENU TALENTOS para depois ser mais fácil imprimi-lo
@@ -132,10 +135,13 @@ public class Platform {
     public void start(){
         history = new History();
         scan = new Scanner(System.in);
+        // Se o ficheiro users.csv não existir é porque a app nunca foi iniciada, por isso vai criar o users.csv e o userHistory.csv quando iniciar
         if(!checkIfUsersCsvFileExists()){
-            File file = new File("src/users.csv");
+            File usersFile = new File("src/users.csv");
+            File historyFile = new File("src/userHistory.csv");
             try {
-                file.createNewFile();
+                usersFile.createNewFile();
+                historyFile.createNewFile();
                 saveUserToCsvFile(new User("admin","admin", Type.ADMIN));
                 System.out.println("Ficheiro criado pois não existia! Inicie a aplicação denovo!");
                 System.exit(0);
@@ -222,12 +228,15 @@ public class Platform {
 
         switch(userType){
             case NORMAL:
+                history.setLoginTime(LocalDateTime.now());
                 initialMenu();
                 break;
             case MANAGER:
+                history.setLoginTime(LocalDateTime.now());
                 initialMenuManager();
                 break;
             case ADMIN:
+                history.setLoginTime(LocalDateTime.now());
                 initialMenuAdmin();
                 break;
         }
@@ -249,6 +258,8 @@ public class Platform {
                     String password = scan.next();
                     saveUserToCsvFile(new User(username, password, Type.NORMAL));
                     System.out.println("Registado com sucesso!");
+                    userType = Type.NORMAL;
+                    history.setLoginTime(LocalDateTime.now());
                     initialMenu();
                 }
         }
@@ -293,25 +304,34 @@ public class Platform {
                 case 0:
                     history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
+                    saveHistoryToCSV(username);
                     scan.close();
                     break;
                 case 1:
+                    history.addUsedCommand("Consultar menu talentos");
                     talentMenu();
                     break;
                 case 2:
+                    history.addUsedCommand("Consultar menu empregos");
                     jobsMenu();
                     break;
                 case 3:
+                    history.addUsedCommand("Consultar menu skills");
                     skillsMenu();
                     break;
                 case 4:
+                    history.addUsedCommand("Consultar menu clientes");
                     clientsMenu();
                     break;
                 case 5:
+                    history.addUsedCommand("Obter preço médio mensal por país");
                     getMediumMonthlyWageByCountry();
+                    initialMenu();
                     break;
                 case 6:
+                    history.addUsedCommand("Obter preço médio mensal por skill");
                     getMediumMonthlyWageBySkill();
+                    initialMenu();
                     break;
             }
     }
@@ -323,7 +343,7 @@ public class Platform {
         while(true){
             try {
                 option = scan.nextInt();
-                if(option < 0 || option > 7) System.out.println("Opção Inválida!\n" + String.join("\n", managerMenu));
+                if(option < 0 || option > 8) System.out.println("Opção Inválida!\n" + String.join("\n", managerMenu));
                 else{
                     break;
                 }
@@ -336,28 +356,43 @@ public class Platform {
             case 0:
                 history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
+                saveHistoryToCSV(username);
                 scan.close();
                 break;
             case 1:
+                history.addUsedCommand("Consultar menu talentos");
                 talentMenu();
                 break;
             case 2:
+                history.addUsedCommand("Consultar menu empregos");
                 jobsMenu();
                 break;
             case 3:
+                history.addUsedCommand("Consultar menu skills");
                 skillsMenu();
                 break;
             case 4:
+                history.addUsedCommand("Consultar menu clientes");
                 clientsMenu();
                 break;
             case 5:
+                history.addUsedCommand("Obter preço médio mensal por país");
                 getMediumMonthlyWageByCountry();
+                initialMenuManager();
                 break;
             case 6:
+                history.addUsedCommand("Obter preço médio mensal por skill");
                 getMediumMonthlyWageBySkill();
+                initialMenuManager();
                 break;
             case 7:
+                history.addUsedCommand("Editar permissões");
                 editPermissions(Type.MANAGER);
+                break;
+            case 8:
+                history.addUsedCommand("Consultar o meu histórico");
+                checkUserHistory(username);
+                initialMenuManager();
                 break;
         }
     }
@@ -368,7 +403,7 @@ public class Platform {
         while(true){
             try {
                 option = scan.nextInt();
-                if(option < 0 || option > 9) System.out.println("Opção Inválida!\n" + String.join("\n", adminMenu));
+                if(option < 0 || option > 11) System.out.println("Opção Inválida!\n" + String.join("\n", adminMenu));
                 else{
                     break;
                 }
@@ -381,38 +416,184 @@ public class Platform {
             case 0:
                 history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
+                saveHistoryToCSV(username);
                 scan.close();
                 break;
             case 1:
+                history.addUsedCommand("Consultar menu talentos");
                 talentMenu();
                 break;
             case 2:
+                history.addUsedCommand("Consultar menu empregos");
                 jobsMenu();
                 break;
             case 3:
+                history.addUsedCommand("Consultar menu skills");
                 skillsMenu();
                 break;
             case 4:
+                history.addUsedCommand("Consultar menu clientes");
                 clientsMenu();
                 break;
             case 5:
+                history.addUsedCommand("Obter preço médio mensal por país");
                 getMediumMonthlyWageByCountry();
+                initialMenuAdmin();
                 break;
             case 6:
+                history.addUsedCommand("Obter preço médio mensal por skill");
                 getMediumMonthlyWageBySkill();
+                initialMenuAdmin();
                 break;
             case 7:
+                history.addUsedCommand("Editar permissões");
                 editPermissions(Type.ADMIN);
                 break;
             case 8:
+                history.addUsedCommand("Criar novo utilizador");
                 createNewUser();
                 break;
             case 9:
+                history.addUsedCommand("Editar utilizador");
                 editUser();
+                break;
+            case 10:
+                history.addUsedCommand("Ver histórico de todos os utilizadores");
+                checkHistory();
+                initialMenuAdmin();
+                break;
+            case 11:
+                history.addUsedCommand("Ver histórico de um utilizador específico");
+                checkUserHistory(getSpecificUser());
+                initialMenuAdmin();
                 break;
         }
     }
 
+    public String getSpecificUser(){
+        System.out.println("----- HISTÓRICO DE UM UTILIZADOR -----");
+        printUserList();
+        System.out.println("Escolha o username que pretende consultar o histórico:");
+        String user = scan.next();
+
+        if(!checkIfUserIsRegistered(user)){
+            while(!checkIfUserIsRegistered(user)){
+                System.out.println("Utilizador não existe! Tente novamente!");
+                user = scan.next();
+            }
+        }
+
+        return user;
+    }
+    public void checkHistory(){
+        System.out.println("----- HISTÓRICO -----");
+        try{
+
+            BufferedReader reader = new BufferedReader(new FileReader("src/userHistory.csv"));
+            // Cria um arraylist para guardar o histórico dos users
+            ArrayList<String> userHistory = new ArrayList<>();
+
+
+            if(reader.readLine() == null) {
+                System.out.println("Histórico vazio!");
+                return;
+            }
+
+            reader.close();
+
+            reader = new BufferedReader(new FileReader("src/userHistory.csv"));
+            String line;
+            while((line = reader.readLine()) != null) {
+                // Adiciona a linha ao arraylist
+                userHistory.add(line);
+            }
+
+            // Ordena o arraylist por loginTime mais recente
+            userHistory.sort(Comparator.comparing(userHistoryline -> userHistoryline.split(",")[1].compareTo(userHistoryline)));
+
+
+            // Imprime o histórico do utilizador
+            for (String history : userHistory) {
+                // Divide a linha num array de strings, por onde está separada por vírgulas
+                String[] values = history.split(",");
+                // Extrai o username, loginTime, logoutTime e os comandos dos utilizadores
+                String username = values[0];
+                String loginTime = values[1];
+                String logoutTime = values[2];
+                // Como o array de comandos pode variar no tamanho, vai fazer uma cópia desde a posição 3 até ao seu tamanho
+                String[] commands = Arrays.copyOfRange(values, 3, values.length);
+
+                if(values.length == 3){
+                    System.out.println(username + "," + loginTime + "," + logoutTime + ",Nenhum comando usado");
+                }else{
+                    // Imprime tudo numa linha
+                    System.out.println(username + "," + loginTime + "," + logoutTime + "," + String.join(", ", commands));
+                }
+
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void checkUserHistory(String username){
+        System.out.println("----- HISTÓRICO DO UTILIZADOR " + username.toUpperCase() +" -----");
+        try{
+            BufferedReader reader = new BufferedReader(new FileReader("src/userHistory.csv"));
+            // Cria um arraylist para guardar o histórico dos users
+            ArrayList<String> userHistory = new ArrayList<>();
+
+            if(reader.readLine() == null) {
+                System.out.println("Histórico vazio!");
+                return;
+            }
+
+            reader.close();
+
+            reader = new BufferedReader(new FileReader("src/userHistory.csv"));
+            String line;
+            while((line = reader.readLine()) != null) {
+                // Adiciona a linha ao arraylist
+                userHistory.add(line);
+            }
+
+            // Ordena o arraylist por loginTime mais recente
+            userHistory.sort(Comparator.comparing(userHistoryline -> userHistoryline.split(",")[1].compareTo(userHistoryline)));
+
+            boolean found = false;
+
+            // Imprime o histórico do utilizador
+            for (String history : userHistory) {
+                // Divide a linha num array de strings, por onde está separada por vírgulas
+                String[] values = history.split(",");
+                // Extrai o username, loginTime, logoutTime e os comandos dos utilizadores
+                String _username = values[0];
+                String loginTime = values[1];
+                String logoutTime = values[2];
+                // Como o array de comandos pode variar no tamanho, vai fazer uma cópia desde a posição 3 até ao seu tamanho
+                String[] commands = Arrays.copyOfRange(values, 3, values.length);
+
+
+                    // Imprime a linha se o utilizador for igual ao parametro passado
+                    if (_username.equals(username)) {
+                        found = true;
+                        if(values.length == 3){
+                            System.out.println(username + "," + loginTime + "," + logoutTime + ",Nenhum comando usado");
+                        }
+                        else{
+                            // Print the information in a single line
+                            System.out.println(username + "," + loginTime + "," + logoutTime + "," + String.join(", ", commands));
+                        }
+                    }
+            }
+            if (!found) {
+                System.out.println("Não foram encontrados registos para o utilizador " + username);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
     public void createNewUser(){
         System.out.println("----- CRIAR NOVO UTILIZADOR -----");
         System.out.println("Insira o username que pretende registar!");
@@ -548,7 +729,7 @@ public class Platform {
 
     public String getUserPassword(String username) {
         String password = null;
-        try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -589,8 +770,7 @@ public class Platform {
             }
         }
 
-
-        Type userType = getUserType(user);
+        getUserType(user);
 
         if(type == Type.ADMIN) {
             editPermsAdmin(user);
@@ -661,7 +841,6 @@ public class Platform {
             }
         }
     }
-
     public void editPermsAdmin(String username){
         System.out.println("Que pretende fazer com esse utilizador?");
         Type temp = getUserType(username);
@@ -796,17 +975,7 @@ public class Platform {
     public void getMediumMonthlyWageByCountry(){
         if(repository.getTalents().isEmpty()){
             System.out.println("Não existem talentos registados para obter informação!");
-            switch(userType){
-                case NORMAL:
-                    initialMenu();
-                    break;
-                case MANAGER:
-                    initialMenuManager();
-                    break;
-                case ADMIN:
-                    initialMenuAdmin();
-                    break;
-            }
+            return;
         }
         System.out.println("----- RELATÓRIO MENSAL POR PAÍS -----");
         System.out.println("Insira o nome do país que pretende ter o relatório:");
@@ -817,34 +986,12 @@ public class Platform {
         System.out.println("----- RESULTADO -----");
         repository.getMediumMonthlyWageByCountry(country);
 
-        switch(userType){
-            case NORMAL:
-                initialMenu();
-                break;
-            case MANAGER:
-                initialMenuManager();
-                break;
-            case ADMIN:
-                initialMenuAdmin();
-                break;
-        }
-
     }
 
     public void getMediumMonthlyWageBySkill(){
         if(repository.getTalents().isEmpty()){
             System.out.println("Não existem talentos registados para obter informação!");
-            switch(userType){
-                case NORMAL:
-                    initialMenu();
-                    break;
-                case MANAGER:
-                    initialMenuManager();
-                    break;
-                case ADMIN:
-                    initialMenuAdmin();
-                    break;
-            }
+            return;
         }
         System.out.println("----- RELATÓRIO MENSAL POR SKILL -----");
         System.out.println("Insira o nome da skill que pretende ter o relatório:");
@@ -856,17 +1003,6 @@ public class Platform {
         System.out.println("----- RESULTADO -----");
         repository.getMediumMonthlyWageBySkill(name);
 
-        switch(userType){
-            case NORMAL:
-                initialMenu();
-                break;
-            case MANAGER:
-                initialMenuManager();
-                break;
-            case ADMIN:
-                initialMenuAdmin();
-                break;
-        }
     }
     /**
      * Método utilizado para fazer o tratamento do MENU DE TALENTOS
@@ -891,18 +1027,23 @@ public class Platform {
                 case 0:
                     history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
+                    saveHistoryToCSV(username);
                     scan.close();
                     break;
                 case 1:
+                    history.addUsedCommand("Listar talentos");
                     listTalents();
                     break;
                 case 2:
+                    history.addUsedCommand("Adicionar talento");
                     addTalentProfile();
                     break;
                 case 3:
+                    history.addUsedCommand("Editar talento");
                     editTalentProfile();
                     break;
                 case 4:
+                    history.addUsedCommand("Procurar talento");
                     searchTalentProfile();
                     talentMenu();
                     break;
@@ -1165,6 +1306,7 @@ public class Platform {
                 case 0:
                     history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
+                    saveHistoryToCSV(username);
                     scan.close();
                     break;
                 case 1:
@@ -1259,6 +1401,7 @@ public class Platform {
                     case 0:
                         history.setLogoutTime(LocalDateTime.now());
                         System.out.println("Exiting...!");
+                        saveHistoryToCSV(username);
                         scan.close();
                         break;
                     case 1:
@@ -1347,24 +1490,30 @@ public class Platform {
                 case 0:
                     history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
+                    saveHistoryToCSV(username);
                     scan.close();
                     break;
                 case 1:
+                    history.addUsedCommand("Listar ofertas de emprego");
                     repository.listJobs();
                     jobsMenu();
                     break;
                 case 2:
+                    history.addUsedCommand("Adicionar oferta de emprego");
                     repository.addJob(scan);
                     jobsMenu();
                     break;
                 case 3:
+                    history.addUsedCommand("Apagar oferta de emprego");
                     repository.deleteJob(scan);
                     jobsMenu();
                     break;
                 case 4:
+                    history.addUsedCommand("Editar oferta de emprego");
                     editJobMenu();
                     break;
                 case 5:
+                    history.addUsedCommand("Procurar talentos para uma oferta de emprego");
                     filterTalentsForJob();
                     jobsMenu();
                     break;
@@ -1517,21 +1666,26 @@ public class Platform {
                 case 0:
                     history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
+                    saveHistoryToCSV(username);
                     scan.close();
                     break;
                 case 1:
+                    history.addUsedCommand("Listar skills");
                     repository.listSkills();
                     skillsMenu();
                     break;
                 case 2:
+                    history.addUsedCommand("Adicionar skill");
                     repository.addNewSkill(scan);
                     skillsMenu();
                     break;
                 case 3:
+                    history.addUsedCommand("Apagar skill");
                     repository.deleteSkill(scan);
                     skillsMenu();
                     break;
                 case 4:
+                    history.addUsedCommand("Editar nome de uma skill");
                     repository.editSkillName(scan);
                     skillsMenu();
                     break;
@@ -1571,17 +1725,21 @@ public class Platform {
             case 0:
                 history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
+                saveHistoryToCSV(username);
                 scan.close();
                 break;
             case 1:
+                history.addUsedCommand("Listar clientes");
                 repository.listClients();
                 clientsMenu();
                 break;
             case 2:
+                history.addUsedCommand("Adicionar cliente");
                 repository.addClient(scan);
                 clientsMenu();
                 break;
             case 3:
+                history.addUsedCommand("Remover cliente");
                 repository.removeClient(scan);
                 clientsMenu();
                 break;
@@ -1668,7 +1826,7 @@ public class Platform {
         }
     }
 
-    public void saveHistoryToCSV(String username) throws IOException {
+    public void saveHistoryToCSV(String username){
         LocalDateTime loginTime = history.getLoginTime();
         LocalDateTime logoutTime = history.getLogoutTime();
         List<String> usedCommands = history.getUsedCommands();
@@ -1689,6 +1847,8 @@ public class Platform {
             sb.deleteCharAt(sb.length() - 1);
             sb.append("\n");
             writer.write(sb.toString());
+        }catch(IOException e){
+            e.printStackTrace();
         }
     }
 
