@@ -1,4 +1,6 @@
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -271,8 +273,8 @@ public class Platform {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts[0].equals(username)) {
-                    // parts[2] = tipo de utilizador
-                    return Type.valueOf(parts[2]);
+                    // parts[3] = tipo de utilizador
+                    return Type.valueOf(parts[3]);
                 }
             }
         } catch (IOException e) {
@@ -686,7 +688,7 @@ public class Platform {
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
                     if (parts[0].equals(oldUsername)) {
-                        lines.add(newUsername + "," + parts[1] + "," + parts[2]);
+                        lines.add(newUsername + "," + parts[1] + "," + parts[2] + "," + parts[3]);
                     } else {
                         lines.add(line);
                     }
@@ -927,7 +929,7 @@ public class Platform {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts[0].equals(username)) {
-                    Type type = Type.valueOf(parts[2]);
+                    Type type = Type.valueOf(parts[3]);
                     return type == Type.ADMIN;
                 }
             }
@@ -943,7 +945,7 @@ public class Platform {
                 String[] parts = line.split(",");
                 String username = parts[0];
                 String password = parts[1];
-                Type type = Type.valueOf(parts[2]);
+                Type type = Type.valueOf(parts[3]);
                 System.out.println(username + "," + password + "," + type);
             }
         } catch (IOException e) {
@@ -958,8 +960,8 @@ public class Platform {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts[0].equals(username)) {
-                    // Update the user's type
-                    lines.add(parts[0] + "," + parts[1] + "," + newType);
+                    // Atualiza o tipo de utilizador
+                    lines.add(parts[0] + "," + parts[1] + "," + parts[2] + "," + newType);
                 } else {
                     lines.add(line);
                 }
@@ -1770,7 +1772,7 @@ public class Platform {
             while((line = reader.readLine()) != null){
                 // Divide uma linha do ficheiro users.csv a partir da vírgula
                 String[] parts = line.split(",");
-                // parts[0] -> username , parts[1] -> password , parts[2] -> tipo de utilizador
+                // parts[0] -> username , parts[1] -> password , parts[2] -> salt, parts[3] -> tipo de utilizador
                 if(parts[0].equalsIgnoreCase(username)) return true;
             }
             reader.close();
@@ -1790,19 +1792,22 @@ public class Platform {
     public boolean checkIfPasswordIsCorrect(String username,String password){
         try{
             String savedPassword="";
+            String salt="";
             BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"));
             String line;
             while((line = reader.readLine()) != null){
                 // Divide uma linha do ficheiro users.csv a partir da vírgula
                 String[] parts = line.split(",");
-                // parts[0] -> username , parts[1] -> password , parts[2] -> tipo de utilizador
+                // parts[0] -> username , parts[1] -> password , parts[2] -> salt, parts[3] -> tipo de utilizador
                 if(parts[0].equalsIgnoreCase(username)) {
                     savedPassword = parts[1];
+                    salt = parts[2];
                     break;
                 }
             }
             reader.close();
-            return savedPassword.equals(password);
+            String encryptedPassword = encrypt(password, salt);
+            return savedPassword.equals(encryptedPassword);
         }catch(IOException e){
             System.out.println("Erro na leitura do ficheiro users.csv: " + e.getMessage());
             return false;
@@ -1816,8 +1821,8 @@ public class Platform {
     public void saveUserToCsvFile(User user){
         try{
             BufferedWriter writer = new BufferedWriter(new FileWriter("src/users.csv",true));
-
-            writer.write(user.getUsername() + "," + user.getPassword() + "," + user.getType());
+            String salt = generateSalt();
+            writer.write(user.getUsername() + "," + encrypt(user.getPassword(),salt) + "," + salt + "," + user.getType());
             writer.newLine();
 
             writer.close();
@@ -1825,7 +1830,32 @@ public class Platform {
             e.printStackTrace();
         }
     }
+    private static final int ITERATION_COUNT = 10000;
+    private static final int KEY_LENGTH = 256;
 
+    public static String encrypt(String password, String salt) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            digest.reset();
+            digest.update(salt.getBytes("UTF-8"));
+            byte[] hash = digest.digest(password.getBytes("UTF-8"));
+            for (int i = 0; i < ITERATION_COUNT; i++) {
+                digest.reset();
+                hash = digest.digest(hash);
+            }
+            return Base64.getEncoder().encodeToString(hash);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    // Gera a criptografia para a pass
+    public static String generateSalt() {
+        SecureRandom random = new SecureRandom();
+        byte[] salt = new byte[KEY_LENGTH];
+        random.nextBytes(salt);
+        return Base64.getEncoder().encodeToString(salt);
+    }
     public void saveHistoryToCSV(String username){
         LocalDateTime loginTime = history.getLoginTime();
         LocalDateTime logoutTime = history.getLogoutTime();
