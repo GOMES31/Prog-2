@@ -1,11 +1,5 @@
 import java.io.*;
-import java.time.DateTimeException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Platform {
     private Repository repository;
@@ -104,7 +98,20 @@ public class Platform {
      */
     public void start(){
         scan = new Scanner(System.in);
-        treatStartMenu();
+        if(!checkIfUsersCsvFileExists()){
+            File file = new File("src/users.csv");
+            try {
+                file.createNewFile();
+                saveUserToCsvFile(new User("admin","admin", Type.ADMIN));
+                System.out.println("Ficheiro criado pois não existia! Inicie a aplicação denovo!");
+                System.exit(0);
+            } catch (IOException e) {
+                System.out.println("Error creating file: " + e.getMessage());
+            }
+        }
+        else{
+            treatStartMenu();
+        }
     }
 
     /**
@@ -147,17 +154,7 @@ public class Platform {
      */
     public boolean checkIfUsersCsvFileExists(){
         File file = new File("src/users.csv");
-        if (!file.exists()) {
-            try {
-                file.createNewFile();
-                saveUserToCsvFile(new User("admin","admin", Type.ADMIN));
-                return false;
-            } catch (IOException e) {
-                System.out.println("Error creating file: " + e.getMessage());
-                return false;
-            }
-        }
-        return true;
+        return file.exists();
     }
 
     /**
@@ -185,7 +182,19 @@ public class Platform {
         }
 
         System.out.println("Logado com sucesso!");
-        initialMenu();
+
+        Type userType = getUserType(username);
+        switch(userType){
+            case NORMAL:
+                initialMenu();
+                break;
+            case MANAGER:
+                initialMenuManager();
+                break;
+            case ADMIN:
+                initialMenuAdmin();
+                break;
+        }
     }
 
     /**
@@ -195,21 +204,36 @@ public class Platform {
         System.out.println("----- REGISTER MENU -----");
         System.out.println("Insira o username que pretende registar!");
         username = scan.next();
-        if(checkIfUsersCsvFileExists()){
-            if(checkIfUserIsRegistered(username)){
+            if(checkIfUsersCsvFileExists()){
+            if(checkIfUserIsRegistered(username)) {
                 System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
                 treatStartMenu();
-            }
-            else{
+            } else {
                 System.out.println("Insira a password que pretende usar!");
                 String password = scan.next();
-                saveUserToCsvFile(new User(username,password,Type.NORMAL));
+                saveUserToCsvFile(new User(username, password, Type.NORMAL));
                 System.out.println("Registado com sucesso!");
                 initialMenu();
             }
         }
     }
 
+    public Type getUserType(String username){
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(username)) {
+                    // parts[2] = tipo de utilizador
+                    return Type.valueOf(parts[2]);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        // Retorna null se o utilizador n for encontrado
+        return null;
+    }
     /**
      * Método utilizado para fazer o tratamento do MENU INICIAL
      */
@@ -254,6 +278,479 @@ public class Platform {
                     break;
             }
     }
+
+    public void initialMenuManager(){
+        defineInitialMenu();
+        String[] managerMenu = new String[8];
+        for(int i = 0; i < initialMenu.length; i++){
+            managerMenu[i] = initialMenu[i];
+        }
+
+        managerMenu[7] = "7 - Editar permissões";
+        System.out.println(String.join("\n", managerMenu) + "\nEscolha uma opção!");
+        int option;
+        while(true){
+            try {
+                option = scan.nextInt();
+                if(option < 0 || option > 7) System.out.println("Opção Inválida!\n" + String.join("\n", managerMenu));
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+            }
+        }
+        switch(option){
+            case 0:
+                System.out.println("Exiting...!");
+                scan.close();
+                break;
+            case 1:
+                talentMenu();
+                break;
+            case 2:
+                jobsMenu();
+                break;
+            case 3:
+                skillsMenu();
+                break;
+            case 4:
+                clientsMenu();
+                break;
+            case 5:
+                getMediumMonthlyWageByCountry();
+                break;
+            case 6:
+                getMediumMonthlyWageBySkill();
+                break;
+            case 7:
+                editPermissions(Type.MANAGER);
+                break;
+        }
+    }
+    public void initialMenuAdmin(){
+        defineInitialMenu();
+        String[] adminMenu = new String[10];
+        for(int i = 0; i < initialMenu.length; i++){
+            adminMenu[i] = initialMenu[i];
+        }
+
+        adminMenu[7] = "7 - Editar permissões";
+        adminMenu[8] = "8 - Criar utilizadores";
+        adminMenu[9] = "9 - Editar utilizadores";
+        System.out.println(String.join("\n", adminMenu) + "\nEscolha uma opção!");
+        int option;
+        while(true){
+            try {
+                option = scan.nextInt();
+                if(option < 0 || option > 9) System.out.println("Opção Inválida!\n" + String.join("\n", adminMenu));
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+            }
+        }
+        switch(option){
+            case 0:
+                System.out.println("Exiting...!");
+                scan.close();
+                break;
+            case 1:
+                talentMenu();
+                break;
+            case 2:
+                jobsMenu();
+                break;
+            case 3:
+                skillsMenu();
+                break;
+            case 4:
+                clientsMenu();
+                break;
+            case 5:
+                getMediumMonthlyWageByCountry();
+                break;
+            case 6:
+                getMediumMonthlyWageBySkill();
+                break;
+            case 7:
+                editPermissions(Type.ADMIN);
+                break;
+            case 8:
+                createNewUser();
+                break;
+            case 9:
+                editUser();
+                break;
+        }
+    }
+
+    public void createNewUser(){
+        System.out.println("----- CRIAR NOVO UTILIZADOR -----");
+        System.out.println("Insira o username que pretende registar!");
+        username = scan.next();
+        if(checkIfUsersCsvFileExists()){
+            if(checkIfUserIsRegistered(username)){
+                System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
+                treatStartMenu();
+            }
+            else{
+                System.out.println("Insira a password que pretende usar!");
+                String password = scan.next();
+                System.out.println("Insira o tipo para o utilizador(NORMAL,ADMIN,MANAGER)");
+                Type userType;
+                while (true) {
+                    System.out.println("Insira o tipo para o utilizador(NORMAL,ADMIN,MANAGER)");
+                    String type = scan.next().toUpperCase();
+                    try {
+                        userType = Type.valueOf(Type.class, type);
+                        break;
+                    } catch (IllegalArgumentException e) {
+                        System.out.println("Tipo inválido! Tente novamente.");
+                    }
+                }
+                saveUserToCsvFile(new User(username,password,userType));
+                System.out.println("Registado com sucesso!");
+            }
+        }
+
+        initialMenuAdmin();
+    }
+
+    public void editUser(){
+        System.out.println("----- EDITAR UTILIZADOR -----");
+        System.out.println("> Lista de utilizadores:");
+        printUserList();
+
+        System.out.println("Escolha o username que pretende editar:");
+        String user = scan.next();
+
+        while(!checkIfUserIsRegistered(user)){
+            System.out.println("Utilizador não existe! Tente novamente!");
+            scan.next();
+        }
+
+        System.out.println("O que pretende editar neste utilizador?");
+        System.out.println("1 - Username\n2 - Password");
+        int option;
+        while(true){
+            try {
+                option = scan.nextInt();
+                if(option < 1 || option > 2) System.out.println("Opção Inválida!\n1 - Username\n2 - Password");
+                else{
+                    break;
+                }
+            }catch(InputMismatchException e){
+                System.out.println("Input inválido! Insira um número!");
+                scan.next();
+            }
+        }
+        switch(option){
+            case 1:
+                editUsername(user);
+                initialMenuAdmin();
+                break;
+            case 2:
+                editPassword(user,getUserPassword(user));
+                initialMenuAdmin();
+                break;
+        }
+    }
+    public void editUsername(String oldUsername) {
+            String newUsername;
+            while (true) {
+                System.out.println("Insira o novo username:");
+                newUsername = scan.next();
+                if (!checkIfUserIsRegistered(newUsername)) {
+                    break;
+                }
+                System.out.println("O username " + newUsername + " já está registado! Tente outro.");
+            }
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(oldUsername)) {
+                        lines.add(newUsername + "," + parts[1] + "," + parts[2]);
+                    } else {
+                        lines.add(line);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            writeFile(lines);
+    }
+
+    public void editPassword(String username,String currentPassword){
+            String newPassword;
+            while (true) {
+                System.out.println("Insira a nova password:");
+                newPassword = scan.next();
+                if (!newPassword.equals(currentPassword)) {
+                    break;
+                }
+                System.out.println("A nova password não pode ser igual à atual! Tente outra.");
+            }
+
+            List<String> lines = new ArrayList<>();
+            try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(username)) {
+                        lines.add(parts[0] + "," + newPassword + "," + parts[1] );
+                    } else {
+                        lines.add(line);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            writeFile(lines);
+    }
+
+    public String getUserPassword(String username) {
+        String password = null;
+        try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(username)) {
+                    password = parts[1];
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return password;
+    }
+
+
+    public void writeFile(List<String> lines){
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.csv"))) {
+            for (String line : lines) {
+                writer.write(line);
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public void editPermissions(Type type){
+        System.out.println("----- EDITAR PERMISSÕES -----");
+        System.out.println("> Lista de utilizadores:");
+        printUserList();
+
+        System.out.println("Escolha o username que pretende editar as permissões:");
+        String user = scan.next();
+
+        while(!checkIfUserIsRegistered(user)){
+            System.out.println("Utilizador não existe! Tente novamente!");
+            scan.next();
+        }
+
+        Type userType = getUserType(user);
+
+        if(type == Type.ADMIN) {
+            editPermsAdmin(user,userType);
+            initialMenuAdmin();
+        }
+
+        if(type == Type.MANAGER){
+            if(isAdmin(user)) {
+                System.out.println("Esse utilizador é um admin, não pode editar as permissões!");
+                editPermissions(type);
+            }
+            editPermsManager(user,userType);
+            initialMenuManager();
+        }
+    }
+
+    public void editPermsManager(String username,Type userType){
+        if(userType == Type.MANAGER) {
+            int option;
+            while (true) {
+                try {
+                    option = scan.nextInt();
+                    if (option < 1 || option > 2)
+                        System.out.println("1 - Tornar utilizador normal\n2 - Tornar admin");
+                    else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                }
+            }
+            switch (option) {
+                case 1:
+                    changeUserType(username, Type.NORMAL);
+                    break;
+                case 2:
+                    changeUserType(username, Type.ADMIN);
+                    break;
+            }
+        }
+        else {
+            int option;
+            while (true) {
+                try {
+                    option = scan.nextInt();
+                    if (option < 1 || option > 2)
+                        System.out.println("1 - Tornar manager\n2 - Tornar admin");
+                    else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                }
+            }
+            switch (option) {
+                case 1:
+                    changeUserType(username, Type.MANAGER);
+                    break;
+                case 2:
+                    changeUserType(username, Type.ADMIN);
+                    break;
+            }
+        }
+    }
+
+    public void editPermsAdmin(String username,Type userType){
+        System.out.println("Que pretende fazer com esse utilizador?");
+        if (userType == Type.ADMIN) {
+            int option;
+            while (true) {
+                try {
+                    option = scan.nextInt();
+                    if (option < 1 || option > 2)
+                        System.out.println("1 - Tornar utilizador normal\n2 - Tornar manager");
+                    else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                }
+            }
+            switch (option) {
+                case 1:
+                    changeUserType(username, Type.NORMAL);
+                    break;
+                case 2:
+                    changeUserType(username, Type.MANAGER);
+                    break;
+            }
+        }
+        else if(userType == Type.MANAGER) {
+            int option;
+            while (true) {
+                try {
+                    option = scan.nextInt();
+                    if (option < 1 || option > 2)
+                        System.out.println("1 - Tornar utilizador normal\n2 - Tornar admin");
+                    else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                }
+            }
+            switch (option) {
+                case 1:
+                    changeUserType(username, Type.NORMAL);
+                    break;
+                case 2:
+                    changeUserType(username, Type.ADMIN);
+                    break;
+            }
+        }
+        else {
+            int option;
+            while (true) {
+                try {
+                    option = scan.nextInt();
+                    if (option < 1 || option > 2)
+                        System.out.println("1 - Tornar manager\n2 - Tornar admin");
+                    else {
+                        break;
+                    }
+                } catch (InputMismatchException e) {
+                    System.out.println("Input inválido! Insira um número!");
+                    scan.next();
+                }
+            }
+            switch (option) {
+                case 1:
+                    changeUserType(username, Type.MANAGER);
+                    break;
+                case 2:
+                    changeUserType(username, Type.ADMIN);
+                    break;
+            }
+        }
+
+    }
+    public boolean isAdmin(String username) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(username)) {
+                    Type type = Type.valueOf(parts[2]);
+                    return type == Type.ADMIN;
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    public void printUserList(){
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                String username = parts[0];
+                String password = parts[1];
+                Type type = Type.valueOf(parts[2]);
+                System.out.println(username + "," + password + "," + type);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void changeUserType(String username, Type newType) {
+        List<String> lines = new ArrayList<>();
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] parts = line.split(",");
+                if (parts[0].equals(username)) {
+                    // Update the user's type
+                    lines.add(parts[0] + "," + parts[1] + "," + newType);
+                } else {
+                    lines.add(line);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        writeFile(lines);
+    }
+
 
     public void getMediumMonthlyWageByCountry(){
         if(repository.getTalents().isEmpty()){
