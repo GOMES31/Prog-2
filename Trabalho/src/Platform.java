@@ -1,13 +1,19 @@
 import java.io.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class Platform {
     private Repository repository;
-    private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu,clientsMenu;
+    private String[] startMenu,initialMenu,talentMenu,skillsMenu,jobsMenu,clientsMenu,adminMenu,managerMenu;
 
     private String username;
 
     private Scanner scan;
+
+    private History history;
+
+    private Type userType;
 
 
     public Platform(){
@@ -18,6 +24,8 @@ public class Platform {
         skillsMenu = new String[7];
         jobsMenu = new String[8];
         clientsMenu = new String[6];
+        adminMenu = new String[11];
+        managerMenu = new String[9];
 
     }
 
@@ -45,6 +53,31 @@ public class Platform {
         initialMenu[7] = "0 - [SAIR]";
     }
 
+    public void defineAdminMenu(){
+        adminMenu[0] = "----- MENU INICIAL -----";
+        adminMenu[1] = "1 - Menu Talentos";
+        adminMenu[2] = "2 - Menu Empregador";
+        adminMenu[3] = "3 - Menu Skills";
+        adminMenu[4] = "4 - Menu Clientes";
+        adminMenu[5] = "5 - Obter relatório gastos mensais por país";
+        adminMenu[6] = "6 - Obter relatório gastos mensais por skill";
+        adminMenu[7] = "7 - Editar permissões";
+        adminMenu[8] = "8 - Criar utilizadores";
+        adminMenu[9] = "9 - Editar utilizadores";
+        adminMenu[10] = "0 - [SAIR]";
+    }
+
+    public void defineManagerMenu(){
+        managerMenu[0] = "----- MENU INICIAL -----";
+        managerMenu[1] = "1 - Menu Talentos";
+        managerMenu[2] = "2 - Menu Empregador";
+        managerMenu[3] = "3 - Menu Skills";
+        managerMenu[4] = "4 - Menu Clientes";
+        managerMenu[5] = "5 - Obter relatório gastos mensais por país";
+        managerMenu[6] = "6 - Obter relatório gastos mensais por skill";
+        managerMenu[7] = "7 - Editar permissões";
+        managerMenu[8] = "0 - [SAIR]";
+    }
     /**
      * Define o array do MENU TALENTOS para depois ser mais fácil imprimi-lo
      */
@@ -97,6 +130,7 @@ public class Platform {
      * Método que inicializa o programa e o Scanner
      */
     public void start(){
+        history = new History();
         scan = new Scanner(System.in);
         if(!checkIfUsersCsvFileExists()){
             File file = new File("src/users.csv");
@@ -135,6 +169,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -183,7 +218,8 @@ public class Platform {
 
         System.out.println("Logado com sucesso!");
 
-        Type userType = getUserType(username);
+        userType = getUserType(username);
+
         switch(userType){
             case NORMAL:
                 initialMenu();
@@ -205,16 +241,16 @@ public class Platform {
         System.out.println("Insira o username que pretende registar!");
         username = scan.next();
             if(checkIfUsersCsvFileExists()){
-            if(checkIfUserIsRegistered(username)) {
-                System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
-                treatStartMenu();
-            } else {
-                System.out.println("Insira a password que pretende usar!");
-                String password = scan.next();
-                saveUserToCsvFile(new User(username, password, Type.NORMAL));
-                System.out.println("Registado com sucesso!");
-                initialMenu();
-            }
+                if(checkIfUserIsRegistered(username)) {
+                    System.out.println("Utilizador já está registado! \nTente criar uma conta com outro username ou então fazer login!");
+                    treatStartMenu();
+                } else {
+                    System.out.println("Insira a password que pretende usar!");
+                    String password = scan.next();
+                    saveUserToCsvFile(new User(username, password, Type.NORMAL));
+                    System.out.println("Registado com sucesso!");
+                    initialMenu();
+                }
         }
     }
 
@@ -255,6 +291,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -280,13 +317,7 @@ public class Platform {
     }
 
     public void initialMenuManager(){
-        defineInitialMenu();
-        String[] managerMenu = new String[8];
-        for(int i = 0; i < initialMenu.length; i++){
-            managerMenu[i] = initialMenu[i];
-        }
-
-        managerMenu[7] = "7 - Editar permissões";
+        defineManagerMenu();
         System.out.println(String.join("\n", managerMenu) + "\nEscolha uma opção!");
         int option;
         while(true){
@@ -303,6 +334,7 @@ public class Platform {
         }
         switch(option){
             case 0:
+                history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
                 scan.close();
                 break;
@@ -330,15 +362,7 @@ public class Platform {
         }
     }
     public void initialMenuAdmin(){
-        defineInitialMenu();
-        String[] adminMenu = new String[10];
-        for(int i = 0; i < initialMenu.length; i++){
-            adminMenu[i] = initialMenu[i];
-        }
-
-        adminMenu[7] = "7 - Editar permissões";
-        adminMenu[8] = "8 - Criar utilizadores";
-        adminMenu[9] = "9 - Editar utilizadores";
+        defineAdminMenu();
         System.out.println(String.join("\n", adminMenu) + "\nEscolha uma opção!");
         int option;
         while(true){
@@ -355,6 +379,7 @@ public class Platform {
         }
         switch(option){
             case 0:
+                history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
                 scan.close();
                 break;
@@ -400,7 +425,6 @@ public class Platform {
             else{
                 System.out.println("Insira a password que pretende usar!");
                 String password = scan.next();
-                System.out.println("Insira o tipo para o utilizador(NORMAL,ADMIN,MANAGER)");
                 Type userType;
                 while (true) {
                     System.out.println("Insira o tipo para o utilizador(NORMAL,ADMIN,MANAGER)");
@@ -428,18 +452,21 @@ public class Platform {
         System.out.println("Escolha o username que pretende editar:");
         String user = scan.next();
 
-        while(!checkIfUserIsRegistered(user)){
-            System.out.println("Utilizador não existe! Tente novamente!");
-            scan.next();
+        if(!checkIfUserIsRegistered(user)){
+            while(checkIfUserIsRegistered(user)){
+                System.out.println("Utilizador não existe! Tente novamente!");
+                user = scan.next();
+            }
         }
 
+
         System.out.println("O que pretende editar neste utilizador?");
-        System.out.println("1 - Username\n2 - Password");
+        System.out.println("1 - Username\n2 - Password\n3 - Voltar ao menu inicial");
         int option;
         while(true){
             try {
                 option = scan.nextInt();
-                if(option < 1 || option > 2) System.out.println("Opção Inválida!\n1 - Username\n2 - Password");
+                if(option < 1 || option > 3) System.out.println("Opção Inválida!\n1 - Username\n2 - Password\n3 - Voltar ao menu inicial");
                 else{
                     break;
                 }
@@ -457,6 +484,9 @@ public class Platform {
                 editPassword(user,getUserPassword(user));
                 initialMenuAdmin();
                 break;
+            case 3:
+                initialMenuAdmin();
+                break;
         }
     }
     public void editUsername(String oldUsername) {
@@ -470,7 +500,7 @@ public class Platform {
                 System.out.println("O username " + newUsername + " já está registado! Tente outro.");
             }
             List<String> lines = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
@@ -499,7 +529,7 @@ public class Platform {
             }
 
             List<String> lines = new ArrayList<>();
-            try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+            try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] parts = line.split(",");
@@ -535,7 +565,7 @@ public class Platform {
 
 
     public void writeFile(List<String> lines){
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter("users.csv"))) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/users.csv"))) {
             for (String line : lines) {
                 writer.write(line);
                 writer.newLine();
@@ -552,15 +582,18 @@ public class Platform {
         System.out.println("Escolha o username que pretende editar as permissões:");
         String user = scan.next();
 
-        while(!checkIfUserIsRegistered(user)){
-            System.out.println("Utilizador não existe! Tente novamente!");
-            scan.next();
+        if(!checkIfUserIsRegistered(user)){
+            while(!checkIfUserIsRegistered(user)){
+                System.out.println("Utilizador não existe! Tente novamente!");
+                user = scan.next();
+            }
         }
+
 
         Type userType = getUserType(user);
 
         if(type == Type.ADMIN) {
-            editPermsAdmin(user,userType);
+            editPermsAdmin(user);
             initialMenuAdmin();
         }
 
@@ -569,13 +602,16 @@ public class Platform {
                 System.out.println("Esse utilizador é um admin, não pode editar as permissões!");
                 editPermissions(type);
             }
-            editPermsManager(user,userType);
+            editPermsManager(user);
             initialMenuManager();
         }
     }
 
-    public void editPermsManager(String username,Type userType){
-        if(userType == Type.MANAGER) {
+    public void editPermsManager(String username){
+        System.out.println("Que pretende fazer com esse utilizador?");
+        Type temp = getUserType(username);
+        if(temp.equals(Type.MANAGER)) {
+            System.out.println("1 - Tornar utilizador normal\n2 - Tornar admin");
             int option;
             while (true) {
                 try {
@@ -600,6 +636,7 @@ public class Platform {
             }
         }
         else {
+            System.out.println("1 - Tornar manager\n2 - Tornar admin");
             int option;
             while (true) {
                 try {
@@ -625,9 +662,11 @@ public class Platform {
         }
     }
 
-    public void editPermsAdmin(String username,Type userType){
+    public void editPermsAdmin(String username){
         System.out.println("Que pretende fazer com esse utilizador?");
-        if (userType == Type.ADMIN) {
+        Type temp = getUserType(username);
+        if (temp.equals(Type.ADMIN)) {
+            System.out.println("1 - Tornar utilizador normal\n2 - Tornar manager");
             int option;
             while (true) {
                 try {
@@ -651,7 +690,8 @@ public class Platform {
                     break;
             }
         }
-        else if(userType == Type.MANAGER) {
+        else if(temp.equals(Type.MANAGER)) {
+            System.out.println("1 - Tornar utilizador normal\n2 - Tornar admin");
             int option;
             while (true) {
                 try {
@@ -676,6 +716,7 @@ public class Platform {
             }
         }
         else {
+            System.out.println("1 - Tornar manager\n2 - Tornar admin");
             int option;
             while (true) {
                 try {
@@ -702,7 +743,7 @@ public class Platform {
 
     }
     public boolean isAdmin(String username) {
-        try (BufferedReader reader = new BufferedReader(new FileReader("users.csv"))) {
+        try (BufferedReader reader = new BufferedReader(new FileReader("src/users.csv"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
@@ -755,7 +796,17 @@ public class Platform {
     public void getMediumMonthlyWageByCountry(){
         if(repository.getTalents().isEmpty()){
             System.out.println("Não existem talentos registados para obter informação!");
-            initialMenu();
+            switch(userType){
+                case NORMAL:
+                    initialMenu();
+                    break;
+                case MANAGER:
+                    initialMenuManager();
+                    break;
+                case ADMIN:
+                    initialMenuAdmin();
+                    break;
+            }
         }
         System.out.println("----- RELATÓRIO MENSAL POR PAÍS -----");
         System.out.println("Insira o nome do país que pretende ter o relatório:");
@@ -766,14 +817,34 @@ public class Platform {
         System.out.println("----- RESULTADO -----");
         repository.getMediumMonthlyWageByCountry(country);
 
-        initialMenu();
+        switch(userType){
+            case NORMAL:
+                initialMenu();
+                break;
+            case MANAGER:
+                initialMenuManager();
+                break;
+            case ADMIN:
+                initialMenuAdmin();
+                break;
+        }
 
     }
 
     public void getMediumMonthlyWageBySkill(){
         if(repository.getTalents().isEmpty()){
             System.out.println("Não existem talentos registados para obter informação!");
-            initialMenu();
+            switch(userType){
+                case NORMAL:
+                    initialMenu();
+                    break;
+                case MANAGER:
+                    initialMenuManager();
+                    break;
+                case ADMIN:
+                    initialMenuAdmin();
+                    break;
+            }
         }
         System.out.println("----- RELATÓRIO MENSAL POR SKILL -----");
         System.out.println("Insira o nome da skill que pretende ter o relatório:");
@@ -785,7 +856,17 @@ public class Platform {
         System.out.println("----- RESULTADO -----");
         repository.getMediumMonthlyWageBySkill(name);
 
-        initialMenu();
+        switch(userType){
+            case NORMAL:
+                initialMenu();
+                break;
+            case MANAGER:
+                initialMenuManager();
+                break;
+            case ADMIN:
+                initialMenuAdmin();
+                break;
+        }
     }
     /**
      * Método utilizado para fazer o tratamento do MENU DE TALENTOS
@@ -808,6 +889,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -825,7 +907,17 @@ public class Platform {
                     talentMenu();
                     break;
                 case 5:
-                    initialMenu();
+                    switch(userType){
+                        case NORMAL:
+                            initialMenu();
+                            break;
+                        case MANAGER:
+                            initialMenuManager();
+                            break;
+                        case ADMIN:
+                            initialMenuAdmin();
+                            break;
+                    }
                     break;
             }
 
@@ -1071,6 +1163,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -1164,6 +1257,7 @@ public class Platform {
                     }
                 switch (option) {
                     case 0:
+                        history.setLogoutTime(LocalDateTime.now());
                         System.out.println("Exiting...!");
                         scan.close();
                         break;
@@ -1251,6 +1345,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -1274,7 +1369,17 @@ public class Platform {
                     jobsMenu();
                     break;
                 case 6:
-                    initialMenu();
+                    switch(userType){
+                        case NORMAL:
+                            initialMenu();
+                            break;
+                        case MANAGER:
+                            initialMenuManager();
+                            break;
+                        case ADMIN:
+                            initialMenuAdmin();
+                            break;
+                    }
                     break;
             }
 
@@ -1410,6 +1515,7 @@ public class Platform {
             }
             switch(option){
                 case 0:
+                    history.setLogoutTime(LocalDateTime.now());
                     System.out.println("Exiting...!");
                     scan.close();
                     break;
@@ -1430,7 +1536,17 @@ public class Platform {
                     skillsMenu();
                     break;
                 case 5:
-                    initialMenu();
+                    switch(userType){
+                        case NORMAL:
+                            initialMenu();
+                            break;
+                        case MANAGER:
+                            initialMenuManager();
+                            break;
+                        case ADMIN:
+                            initialMenuAdmin();
+                            break;
+                    }
                     break;
             }
     }
@@ -1453,6 +1569,7 @@ public class Platform {
         }
         switch(option){
             case 0:
+                history.setLogoutTime(LocalDateTime.now());
                 System.out.println("Exiting...!");
                 scan.close();
                 break;
@@ -1469,7 +1586,17 @@ public class Platform {
                 clientsMenu();
                 break;
             case 4:
-                initialMenu();
+                switch(userType){
+                    case NORMAL:
+                        initialMenu();
+                        break;
+                    case MANAGER:
+                        initialMenuManager();
+                        break;
+                    case ADMIN:
+                        initialMenuAdmin();
+                        break;
+                }
                 break;
         }
     }
@@ -1540,4 +1667,29 @@ public class Platform {
             e.printStackTrace();
         }
     }
+
+    public void saveHistoryToCSV(String username) throws IOException {
+        LocalDateTime loginTime = history.getLoginTime();
+        LocalDateTime logoutTime = history.getLogoutTime();
+        List<String> usedCommands = history.getUsedCommands();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        String loginTimeStr = loginTime.format(formatter);
+        String logoutTimeStr = logoutTime.format(formatter);
+
+        String filePath = "src/userHistory.csv";
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath, true))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(username).append(",");
+            sb.append(loginTimeStr).append(",");
+            sb.append(logoutTimeStr).append(",");
+            for (String command : usedCommands) {
+                sb.append(command).append(",");
+            }
+            sb.deleteCharAt(sb.length() - 1);
+            sb.append("\n");
+            writer.write(sb.toString());
+        }
+    }
+
 }

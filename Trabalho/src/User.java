@@ -1,4 +1,10 @@
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class User {
     private String username;
@@ -6,14 +12,13 @@ public class User {
 
     private Type type;
 
-    private History history;
 
     public User(String username, String password,Type type){
             this.username = username;
             this.password = password;
             this.type = type;
-            history = new History();
     }
+
 
     public String getUsername(){
         return username;
@@ -28,12 +33,5 @@ public class User {
         this.type = type;
     }
 
-    public History getHistory(){
-        return history;
-    }
-
-    public void setHistory(History history){
-        this.history = history;
-    }
 
 }

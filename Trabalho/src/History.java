@@ -10,6 +10,9 @@ public class History{
             this.usedCommands = new ArrayList<>();
         }
 
+        public void addUsedMethod(String method){
+            usedCommands.add(method);
+        }
         public void setLoginTime(LocalDateTime loginDateTime){
             this.loginDateTime = loginDateTime;
         }
